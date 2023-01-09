@@ -1,0 +1,6 @@
+﻿Name,Code,OrderNumber,ProductLevel,EstimationInSeconds,GroupId
+All,All,1,PE-LV1,3600,1
+AllQC,AllQC,2,PE-LV2,3600,2
+Windown,Windown,3,PE-LV3,3600,3
+WindownQC,WindownQC,4,PE-LV4,3600,2
+DCQC,DCQC,5,PE-LV5,3600,2

@@ -1,0 +1,26 @@
+# https://hub.docker.com/_/microsoft-dotnet
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+WORKDIR /source
+
+# copy csproj and restore as distinct layers
+COPY WeEditPlatform.sln ./
+COPY API/*.csproj ./API/
+COPY CrossCutting/*.csproj ./CrossCutting/
+COPY Application/*.csproj ./Application/
+COPY Domain/*.csproj ./Domain/
+COPY Infrastructure/*.csproj ./Infrastructure/
+COPY CronJob/*.csproj ./CronJob/
+COPY Testing/*.csproj ./Testing/
+
+RUN dotnet restore WeEditPlatform.sln --use-current-runtime
+RUN dotnet restore API/API.csproj --use-current-runtime
+
+# copy everything else and build app
+COPY . .
+RUN dotnet publish API/API.csproj -c Production -o /app --use-current-runtime --self-contained false --no-restore
+
+# final stage/image
+FROM mcr.microsoft.com/dotnet/aspnet:6.0
+WORKDIR /app
+COPY --from=build /app .
+ENTRYPOINT ["dotnet", "API.dll"]
