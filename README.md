@@ -1,5 +1,9 @@
 ## WeEdit
 
+## Projects
+- API
+- CronJob
+
 ### Migrations CLI
 dotnet ef migrations add [AddedFileName] -o DataAccess/Migrations
 dotnet ef migrations remove
