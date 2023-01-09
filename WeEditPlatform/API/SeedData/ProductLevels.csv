@@ -1,0 +1,68 @@
+﻿Code,Name,Description
+PE-LV1,	Single Exposure Editing,	Chỉnh sửa ảnh đơn
+PE-LV2,	HDR Editing	Chỉnh, sửa ảnh HDR
+PE-LV3,	Multiple Exposure Manual Blending,	Chỉnh sửa đa ảnh phơi sáng
+PE-LV4,	Flambient Editing,	Chỉnh sửa ảnh phong cách tự nhiên
+PE-LV5,	Editorial style,	Chỉnh sửa ảnh phong cách tạp chí
+PE-DTE-Out,	DTE Outdoor,	Chỉnh sửa ảnh ngày chuyển đêm ngoài trời
+PE-DTE-In,	DTE Indoor,	Chỉnh sửa ảnh ngày chuyển đêm trong nhà
+PE-DTEAdv,	DTE Advance,	Chỉnh sửa ảnh ngày chuyển đêm nâng cao
+PE-DTE-Pano,	Pano DTE,	Chỉnh sửa ảnh ngày chuyển đêm panorama
+PE-Drone,	Drone,	Chỉnh sửa ảnhtoàn cảnh trên cao
+PE-TW,	Twilight,	Chỉnh sửa ảnh trời chiều
+PE-TW Adv,	Twilight Advance,	Chỉnh sửa ảnh trời chiều nâng cao
+PE-Pano,	Pano (360),	Chỉnh sửa ảnh ghép toàn cảnh 360
+PE-Pano-RT,	Pano (720),	Chỉnh sửa ảnh ghép toàn cảnh 720
+PE-PanoE,	Pano Editing,	Chỉnh sửa ảnh sửa toàn cảnh
+PE-WD,	Window,	Chi tiết vùng cửa số
+AO-LV1,	Add-on Leve1,	Tiện ích bổ sung cấp độ 1
+AO-LV2,	Add-on level 2,	Tiện ích bổ sung cấp độ 2
+AO-LV3,	Add-on level 3,	Tiện ích bổ sung cấp độ 3
+RT-LV1,	Retouching Basic,	Xoá và tái tạo chi tiết loại cơ bản
+RT-LV2,	Retouching Advance,	Xoá và tái tạo chi tiết loại vừa
+RT-LV3,	Retouching Extreme,	Xoá và tái tạo chi tiết loại khó
+PT-1,	Potrait 1-2 ppl,	Chỉnh sửa ảnh chân dung từ 1-2 người
+PT-2,	Potrait 3 ppl,	Chỉnh sửa ảnh chân dung 3 người
+PT-3,	Potrait over 3 ppl,	Chỉnh sửa ảnh chân dung trên 3 người
+CP-LV1,	Clipping Path Level 1,	Chỉnh sửa ảnh sản phẩm cấp độ 1
+CP-LV2,	Clipping Path Level 2,	Chỉnh sửa ảnh sản phẩm cấp độ 2
+CP-LV3,	Clipping Path Level 3,	Chỉnh sửa ảnh sản phẩm cấp độ 3
+FP-B&W,	Floor Plan B&W,	Vẽ sơ đồ mặt bằng 2D loại đen trắng
+FPSP-B&W,	Floor Plan B&W + Site Plan,	Vẽ sơ đồ mặt bằng 2D loại đen trắng kèm cảnh quan bên ngoài
+FP-C,	Floor Plan Colour,	Vẽ sơ đồ mặt bằng 2D loại có màu
+FPSP-C,	Floor Plan Colour + Site Plan,	Vẽ sơ đồ mặt bằng 2D loại có màu kèm cảnh quan bên ngoài
+FP-TNF,	Floor Plan Texture w/o Furniture,	Vẽ sơ đồ mặt bằng 2D kết cấu không có nội thất
+FPSP-TNF,	Floor Plan Texture w/o Furniture  + Site Plan,	Vẽ sơ đồ mặt bằng 2D kết cấu không có nội thất kèm cảnh quan bên ngoài
+FP-TFF,	Floor Plan Texture Full Furniture,	Vẽ sơ đồ mặt bằng 2D kết cấu có nội thất
+FPSP-TFF,	Floor Plan Texture Full Furniture  + Site Plan,	Vẽ sơđồ mặt bằng 2D kết cấu có nội thất kèm cảnh quan bên ngoài
+2DSP,	2D Siteplan only,	Vẽ sơ đồ cảnh quan 2D
+FP-3DNF,	Floor Plan 3D w/o Furniture,	Vẽ sơ đồ mặt bằng 3D không có nội thất
+FP-3DFF,	Floor Plan 3D Full Furniture,	Vẽ sơ đồ mặt bằng 3D có nội thất
+3DSP,	3D Siteplan only,	Vẽ sơ đồ cảnh quan 3D
+FP-AO1,	Floor Plan Add-on Level 1,	Vẽ sơ đồ mặt bằng - Tiện ích bổ sung cấp độ 1
+FP-AO2,	Floor Plan Add-on Level 2,	Vẽ sơ đồ mặt bằng - Tiện ích bổ sung cấp độ 2
+VS,	Virtual, Staging	Dựng nội thất ảo 3D
+CGI,	CGI,	Dựng công trình ảo 3D
+SS-LV1,	Slideshow Basic,	Trình chiếu ảnh loại cơ bản
+SS-LV2,	Slideshow Intermediate,	Trình chiếu ảnh loại vừa
+SS-LV3,	Slideshow Advance,	Trình chiếu ảnh loại nâng cao
+VE-LV1,	Video Editing Basic,	Chỉnh sửa video loại cơ bản
+VE-LV2,	Video Editing Standard,	Chỉnh sửa video loại tiêu chuẩn
+VE-LV3,	Video Editing Intermediate,	Chỉnh sửa video loại vừa
+VE-LV4,	Video Editing Advance,	Chỉnh sửa video loại nâng cao
+VE-LV5,	Video Editing Premium,	Chỉnh sửa video loại cao cấp
+VE-HE,	Video Editing High End,	Chỉnh sửa video loại siêu cao cấp
+VE-AE,	Video Editing with Animation, Effect	Chỉnh sửa video kèm hiệu ứng hoạt hoạ
+VE-AO,	Video Editing Add-on,	Tiện ích bổ sung cho video
+TL-LV1,	Timelapse Level 1,	Timelapse cấp độ 1
+TL-LV2,	Timelapse Level 2,	Timelapse cấp độ 2
+TL-LV3,	Timelapse Level 3,	Timelapse cấp độ 3
+TL-LV4,	Timelapse Level 4,	Timelapse cấp độ 4
+VE-MV,	VE-MV ( Media Video ),	(Chỉnh sửa video cấp độ 1)
+VE-1m,	VE-1m (1 min),	(Chỉnh sửa video cấp độ 1.1)
+VE-2m,	VE-1m (2 mins),	(Chỉnh sửa video cấp độ 1.2)
+VE-3m,	VE-1m (3 mins),	(Chỉnh sửa video cấp độ 1.3)
+VE-4m,	VE-1m (4 mins),	(Chỉnh sửa video cấp độ 1.4)
+VE-5m,	VE-1m (5 mins),	(Chỉnh sửa video cấp độ 1.5)
+VE-6m,	VE-1m (6 mins),	(Chỉnh sửa video cấp độ 1.6)
+VE-7m,	VE-1m (7 mins),	(Chỉnh sửa video cấp độ 1.7)

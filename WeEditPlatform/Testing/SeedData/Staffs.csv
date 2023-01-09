@@ -1,0 +1,9 @@
+﻿FullName,Account,Email,Role,Group
+Windy Vũ,quyen.vt,quyenvt@outlook.com,Admin,Admin
+Editor 1,editor.1,editor1@outlook.com,Editor,PhotoEditing
+HighQuality 1,HighQuality.1,HighQuality@outlook.com,Editor,HighQuality
+MergeRetouch 1,MergeRetouch.1,MergeRetouch@outlook.com,Editor,MergeRetouch
+Video 1,Video.1,Video1@outlook.com,Editor,Video
+_2D3D 1,_2D3D.1,_2D3D1@outlook.com,Editor,2D3D
+QC 1,QC.1,QC1@outlook.com,QC,QC
+DCQC 1,DCQC.1,DCQC1@outlook.com,QC,DCQC
