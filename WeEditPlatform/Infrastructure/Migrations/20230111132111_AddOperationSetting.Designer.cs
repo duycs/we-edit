@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Persistences;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ProductionContext))]
-    partial class ProductionContextModelSnapshot : ModelSnapshot
+    [Migration("20230111132111_AddOperationSetting")]
+    partial class AddOperationSetting
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -72,41 +74,6 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Customers", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Flow", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("DateCreated")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<long>("DateDeleted")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("DateModified")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("longtext");
-
-                    b.Property<int?>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Type")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("uid")
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Flows", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Group", b =>
@@ -328,26 +295,24 @@ namespace Infrastructure.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("ExecutionName")
+                        .IsRequired()
                         .HasColumnType("longtext");
-
-                    b.Property<int?>("FlowId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int?>("Type")
+                    b.Property<int>("Type")
                         .HasColumnType("int");
 
                     b.Property<Guid>("Uid")
                         .HasColumnType("char(36)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("FlowId");
 
                     b.ToTable("Operations");
                 });
@@ -740,15 +705,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Worker");
                 });
 
-            modelBuilder.Entity("Domain.Operation", b =>
-                {
-                    b.HasOne("Domain.Flow", "Flow")
-                        .WithMany("Operations")
-                        .HasForeignKey("FlowId");
-
-                    b.Navigation("Flow");
-                });
-
             modelBuilder.Entity("Domain.OperationSetting", b =>
                 {
                     b.HasOne("Domain.Operation", "Operation")
@@ -853,11 +809,6 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("ProductLevel");
-                });
-
-            modelBuilder.Entity("Domain.Flow", b =>
-                {
-                    b.Navigation("Operations");
                 });
 
             modelBuilder.Entity("Domain.Group", b =>

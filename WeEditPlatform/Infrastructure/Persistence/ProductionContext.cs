@@ -22,6 +22,10 @@ namespace Infrastructure.Persistences
         public DbSet<StaffRole> StaffRoles { get; set; }
         public DbSet<StaffGroup> StaffGroups { get; set; }
 
+        public DbSet<Operation> Operations { get; set; }
+        public DbSet<Setting> Settings { get; set; }
+        public DbSet<OperationSetting> OperationSettings { get; set; }
+
         /// <summary>
         /// Must concreate first for ef migrations
         /// </summary>
@@ -50,8 +54,6 @@ namespace Infrastructure.Persistences
             {
                 // TODO: Hardcode connection string for migration CLI 
                 // Set Allow User Variables = True, For solve issue when migrations: MySql.Data.MySqlClient.MySqlException (0x80004005): Parameter @X must be defined.
-
-                //optionsBuilder.UseMySQL("Server=;port=3306;Database=StagingWeedit;user=duy;password=;CharSet=utf8;Allow User Variables=True");
             }
         }
 
@@ -214,6 +216,31 @@ namespace Infrastructure.Persistences
            });
 
 
+            // Many Operations with many Settings
+            modelBuilder.Entity<Operation>()
+              .HasMany(i => i.Settings)
+              .WithMany(i => i.Operations)
+              .UsingEntity<OperationSetting>(
+              j => j
+                  .HasOne(w => w.Setting)
+                  .WithMany(w => w.OperationSettings)
+                  .HasForeignKey(w => w.SettingId)
+                  .OnDelete(DeleteBehavior.NoAction),
+              j => j
+                  .HasOne(w => w.Operation)
+                  .WithMany(w => w.OperationSettings)
+                  .HasForeignKey(w => w.OperationId)
+                  .OnDelete(DeleteBehavior.Cascade), // delete operation then delete settings
+              j =>
+              {
+                  j.Ignore(w => w.Id).HasKey(w => new { w.OperationId, w.SettingId });
+              });
+
+
+            modelBuilder.Entity<Flow>().ToTable("Flows").HasKey(c => c.Id);
+
+            // Flow has many Operations
+            modelBuilder.Entity<Operation>().HasOne(w => w.Flow).WithMany(w => w.Operations).HasForeignKey(w => w.FlowId);
         }
 
     }

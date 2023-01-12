@@ -32,12 +32,14 @@ namespace Infrastructure.Repository
         T Find<T>(int id, SpecificationBase<T> specification) where T : EntityBase;
 
         T Find<T>(Expression<Func<T, bool>> where) where T : EntityBase;
+        T Find<T>(string rawSql) where T : EntityBase;
 
         List<T> List<T>(int[] Ids) where T : EntityBase;
         List<T> List<T>(int[] Ids, out int[] invalidIds) where T : EntityBase;
         List<T> List<T>(int[] Ids, SpecificationBase<T> specification) where T : EntityBase;
 
         List<T> List<T>(Expression<Func<T, bool>> where) where T : EntityBase;
+        List<T> List<T>(string rawSql) where T : EntityBase;
 
         IQueryable<T> ListAsQueryable<T>(Expression<Func<T, bool>> where) where T : EntityBase;
 
