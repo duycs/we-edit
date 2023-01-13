@@ -7,8 +7,9 @@ using Infrastructure.Repository;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System.Text;
 
-namespace Application.Commands
+namespace Application.Operations.Actions.AssignAction
 {
     public class AssignActionCommandHandler : IRequestHandler<AssignActionCommand, InvokeResult>
     {
@@ -26,7 +27,7 @@ namespace Application.Commands
 
         public async Task<InvokeResult> Handle(AssignActionCommand request, CancellationToken cancellationToken)
         {
-            string message = "";
+            var message = new StringBuilder();
 
             try
             {
@@ -42,15 +43,16 @@ namespace Application.Commands
 
                 // Filter Staff action
                 var filterStaffIds = _repositoryService.List<Staff>(request.RawSqlFilterStaff).Select(s => s.Id).ToArray();
-                var filterStaffs = _repositoryService.List<Staff>(filterStaffIds, new StaffSpecification(true)).ToList();
+                var filterStaffs = _repositoryService.List(filterStaffIds, new StaffSpecification(true)).ToList();
 
                 // Assign Action execute from output of FilterJobStep and FilterStaff actions
                 if (filterJobSteps == null || !filterJobSteps.Any() || filterStaffs == null || !filterStaffs.Any())
                 {
-                    message = $"filterJobSteps count: {filterJobSteps?.Count}, filterStaffs count: {filterStaffs?.Count}";
-                    _logger.LogInformation(message);
+                    message.Append($"filterJobSteps count: {filterJobSteps?.Count}, filterStaffs count: {filterStaffs?.Count}");
 
-                    return new InvokeResult(true, message);
+                    _logger.LogInformation(message.ToString());
+
+                    return new InvokeResult(true, message.ToString());
                 }
 
                 // Assign action
@@ -59,8 +61,7 @@ namespace Application.Commands
                 var assignedStaffs = new List<Staff>();
                 while (filterStaffs != null && filterStaffs.Any())
                 {
-                    message = $"In While filterStaffs count : {filterStaffs?.Count}.";
-                    _logger.LogInformation(message);
+                    message.AppendLine($"In While filterStaffs count : {filterStaffs?.Count}.");
 
                     foreach (var jobStep in filterJobSteps)
                     {
@@ -94,7 +95,7 @@ namespace Application.Commands
                             _repositoryService.Update(matchedStaff);
                             _repositoryService.SaveChanges();
 
-                            // remove assigned staff
+                            // remove assigned staff from filterStaffs
                             filterStaffs.Remove(matchedStaff);
 
                             assignedStaffs.Add(matchedStaff);
@@ -102,14 +103,19 @@ namespace Application.Commands
                     }
                 }
 
-                message = $"assignedStaffIds: {string.Join(",", assignedStaffs.Select(s => s.Id))}.";
-                _logger.LogInformation(message);
+                message.AppendLine($"assignedStaffIds: {string.Join(",", assignedStaffs.Select(s => s.Id))}.");
 
-                return new InvokeResult(true, message);
+                _logger.LogInformation(message.ToString());
+
+                return new InvokeResult(true, message.ToString());
             }
             catch (Exception ex)
             {
-                return new InvokeResult(false, ex.Message.ToString());
+                message.AppendLine(ex.Message.ToString());
+
+                _logger.LogError(message.ToString());
+
+                return new InvokeResult(false, message.ToString());
             }
         }
 

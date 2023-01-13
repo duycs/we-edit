@@ -1,5 +1,5 @@
-﻿using Application.Commands;
-using Application.Models;
+﻿using Application.Models;
+using Application.Operations.Actions.AssignAction;
 using Application.Services;
 using Infrastructure.Commands;
 using Infrastructure.Events;
@@ -32,7 +32,8 @@ namespace CrossCutting
             else
             {
                 // Mysql provider
-                services.AddDbContext<ProductionContext>(options => options.UseMySQL(connectionString));
+                services.AddDbContext<ProductionContext>(options => options.UseMySQL(connectionString,
+                    options => options.CommandTimeout(300)));
             }
 
             // Persistence: generic repository

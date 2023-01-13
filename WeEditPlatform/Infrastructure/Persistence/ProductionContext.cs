@@ -31,7 +31,7 @@ namespace Infrastructure.Persistences
         /// <summary>
         /// Must concreate first for ef migrations
         /// </summary>
-        public ProductionContext() { }
+        public ProductionContext() {}
 
         public ProductionContext(string connectionString)
         {

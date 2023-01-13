@@ -1,9 +1,8 @@
-﻿using Application.Commands;
-using Application.Models;
+﻿using Application.Models;
+using Application.Operations;
 using Application.Queries;
 using Domain;
 using Infrastructure.Commands;
-using Infrastructure.Extensions;
 using Infrastructure.Models;
 using Infrastructure.Repository;
 using Microsoft.Extensions.Logging;
@@ -97,17 +96,18 @@ namespace Application.Services
 
         public async Task<InvokeResult> Invoke(int id)
         {
-            string message = "";
+            var message = new StringBuilder();
             try
             {
                 var operation = _repositoryService.Find(id, new OperationSpecification(true));
 
                 if (operation == null)
                 {
-                    message = $"Operation {id} not found.";
-                    _logger.LogError(message);
+                    message.AppendLine($"Operation {id} not found.");
 
-                    return new InvokeResult(false, message);
+                    _logger.LogError(message.ToString());
+
+                    return new InvokeResult(false, message.ToString());
                 }
 
                 // active operation
@@ -115,50 +115,36 @@ namespace Application.Services
                 _repositoryService.Update(operation);
                 _repositoryService.SaveChanges();
 
-                message = $"Active Operation {id}. ExecutionName {operation.ExecutionName}.";
-                _logger.LogInformation(message);
+                message.AppendLine($"Active Operation {id}. ExecutionName {operation.ExecutionName}.");
 
-                switch (operation.ExecutionName)
+                var operationExecution = new OperationFactory(operation, _logger, _commandDispatcher).GetOperationBasedOnOperation();
+
+                if (operationExecution == null)
                 {
-                    case "AssignAction":
+                    message.AppendLine($"Not found Operation {id}, ExecutionName {operation.ExecutionName}.");
 
-                        if (operation.Settings == null || !operation.Settings.Any())
-                        {
-                            message = "Not found any Settings.";
-                            _logger.LogError(message);
-
-                            return new InvokeResult(false, message);
-                        }
-
-                        var settings = operation.Settings.ToList();
-
-                        var assignActionCommand = new AssignActionCommand(
-                            settings.GetValueSettingByKey(ClassExtension.GetMemberName((AssignActionCommand c) => c.MatchingAssignSetting)),
-                            settings.GetValueSettingByKey(ClassExtension.GetMemberName((AssignActionCommand c) => c.RawSqlFilterJobStep)),
-                            settings.GetValueSettingByKey(ClassExtension.GetMemberName((AssignActionCommand c) => c.ValidJobStepIsExpriedMethod)),
-                            settings.GetValueSettingByKey(ClassExtension.GetMemberName((AssignActionCommand c) => c.RawSqlFilterStaff))
-                            );
-
-                        await _commandDispatcher.SendGetResponse(assignActionCommand);
-
-                        break;
-
-                    default:
-                        message = $"ExecutionName {operation.ExecutionName} not exist.";
-                        _logger.LogError(message);
-
-                        return new InvokeResult(false, message);
-
+                    return new InvokeResult(false, message.ToString());
                 }
 
-                return new InvokeResult(true, message);
+                // PreProcessing prepare command -> Processing execute command -> PostProcess find route to toOperation
+                message.AppendLine($"Operation {id}. PreProcessing prepare command -> Processing execute command -> PostProcess find route to toOperation");
+
+                operationExecution.PreProcessing().IsValid().Processing().Result.IsValid().PostProcessing().IsValid();
+
+                var invokeResult = new InvokeResult(true, message.ToString());
+
+                // add message operation after process
+                invokeResult.AddMessage(operationExecution.GetMessage());
+
+                return invokeResult;
             }
             catch (Exception ex)
             {
-                message = ex.ToString();
-                _logger.LogError(message);
+                message.AppendLine(ex.ToString());
 
-                return new InvokeResult(false, message);
+                _logger.LogError(message.ToString());
+
+                return new InvokeResult(false, message.ToString());
             }
         }
 

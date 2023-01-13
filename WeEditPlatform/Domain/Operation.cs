@@ -29,7 +29,6 @@ namespace Domain
         /// </summary>
         public bool Active { get; set; }
 
-
         public static Operation Create(Flow flow, OperationType? type, string? name, string? description,
             string? executionName, bool? firstRoute, Setting[]? settings)
         {
