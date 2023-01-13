@@ -3,6 +3,7 @@ using Application.Queries;
 using Domain;
 using Infrastructure.Pagging;
 using Infrastructure.Repository;
+using Newtonsoft.Json;
 
 namespace Application.Services
 {
@@ -247,6 +248,9 @@ namespace Application.Services
             }
         }
 
+        const string matchingAssignSetting = "{\"IsGroupMatching\": true, \"IsProductLevelMatching\" : true}";
+        const string validJobStepIsExpriedMethod = "jobstep.isExpried";
+
         public List<JobStep> AutoAssignStaffToStep()
         {
             try
@@ -254,8 +258,13 @@ namespace Application.Services
                 var assignedJobSteps = new List<JobStep>();
 
                 // Scan Jobs have Todo Steps
-                var todoJobSteps = _repositoryService.List<JobStep>(w => w.Status == null || w.Status == StepStatus.Todo).ToArray();
-                var steps = _repositoryService.All<Step>();
+                var todoJobSteps = _repositoryService.List<JobStep>(w => w.Status == null || w.Status == StepStatus.Todo).ToList();
+
+                // And Not Expired time
+                if (!string.IsNullOrEmpty(validJobStepIsExpriedMethod))
+                {
+                    todoJobSteps = todoJobSteps.Where(s => !s.IsExpried()).ToList();
+                }
 
                 // Matching Staff and Step by ProductLevel
                 if (!todoJobSteps.Any())
@@ -276,44 +285,59 @@ namespace Application.Services
                     return new List<JobStep>();
                 }
 
-                foreach (var jobStep in todoJobSteps)
-                {
-                    var step = steps.FirstOrDefault(s => s.Id == jobStep.StepId);
-
-
-                    // Group matching
-                    // TODO: or not
-                    var staffMatchedByGroup = freeActiveStaffs.Where(s => s.Groups != null && s.Groups.Select(g => g.Id).Contains(step.GroupId));
-
-                    // And ProductLevel matching
-                    var matchedStaffs = staffMatchedByGroup.FirstOrDefault(s => s.ProductLevels != null &&
-                        s.ProductLevels.Contains(step.ProductLevel));
-
-                    // And Estimation time matching
-
-                    if (matchedStaffs != null)
-                    {
-                        // Assign staff to step, set status Assigned
-                        jobStep.SetWorkerAtShift(matchedStaffs.Id, matchedStaffs.GetCurrentShift().Id);
-                        jobStep.UpdateStatus(StepStatus.Assigned);
-                        jobStep.SetEstimationInSeconds(step.EstimationInSeconds);
-                        matchedStaffs.SetAssigned();
-
-                        // save update assigned
-                        _repositoryService.Update(jobStep);
-                        _repositoryService.Update(matchedStaffs);
-                        _repositoryService.SaveChanges();
-
-                        assignedJobSteps.Add(jobStep);
-                    }
-                }
-
-                return assignedJobSteps.ToList();
+                return AssignOperation(todoJobSteps, freeActiveStaffs, JsonConvert.DeserializeObject<MatchingAssignSetting>(matchingAssignSetting));
             }
             catch (Exception ex)
             {
                 throw;
             }
+        }
+
+
+        private List<JobStep> AssignOperation(List<JobStep> todoJobSteps, List<Staff> freeActiveStaffs,
+            MatchingAssignSetting matchingAssignSetting)
+        {
+            var assignedJobSteps = new List<JobStep>();
+            var steps = _repositoryService.All<Step>();
+
+            foreach (var jobStep in todoJobSteps)
+            {
+                var matchedStaffs = new List<Staff>();
+                var step = steps.FirstOrDefault(s => s.Id == jobStep.StepId);
+
+                // And Group matching
+                if (matchingAssignSetting.IsGroupMatching)
+                {
+                    matchedStaffs = freeActiveStaffs.Where(s => s.Groups != null && s.Groups.Select(g => g.Id).Contains(step.GroupId)).ToList();
+                }
+
+                // And ProductLevel matching
+                if (matchingAssignSetting.IsProductLevelMatching)
+                {
+                    matchedStaffs = matchedStaffs.Where(s => s.ProductLevels != null &&
+                        s.ProductLevels.Contains(step.ProductLevel)).ToList();
+                }
+
+                if (matchedStaffs != null && matchedStaffs.Any())
+                {
+                    var matchedStaff = matchedStaffs.FirstOrDefault();
+
+                    // Assign staff to step, set status Assigned
+                    jobStep.SetWorkerAtShift(matchedStaff.Id, matchedStaff.GetCurrentShift().Id);
+                    jobStep.UpdateStatus(StepStatus.Assigned);
+                    jobStep.SetEstimationInSeconds(step.EstimationInSeconds);
+                    matchedStaff.SetAssigned();
+
+                    // save update assigned
+                    _repositoryService.Update(jobStep);
+                    _repositoryService.Update(matchedStaff);
+                    _repositoryService.SaveChanges();
+
+                    assignedJobSteps.Add(jobStep);
+                }
+            }
+
+            return assignedJobSteps;
         }
 
         public List<JobStep> FindJobStepsOfJob(params int[] jobIds)

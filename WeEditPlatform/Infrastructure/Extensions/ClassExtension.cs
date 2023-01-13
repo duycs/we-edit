@@ -7,13 +7,8 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Extensions
 {
-    public static class StringExtension
+    public static class ClassExtension
     {
-        public static bool IsUuid(this string id)
-        {
-            return id.Contains("-") || id.Contains("_");
-        }
-
         public static string GetMemberName<T, TValue>(Expression<Func<T, TValue>> memberAccess)
         {
             return ((MemberExpression)memberAccess.Body).Member.Name;

@@ -22,6 +22,12 @@ namespace Infrastructure.Persistences
         public DbSet<StaffRole> StaffRoles { get; set; }
         public DbSet<StaffGroup> StaffGroups { get; set; }
 
+        public DbSet<Operation> Operations { get; set; }
+        public DbSet<Setting> Settings { get; set; }
+        public DbSet<OperationSetting> OperationSettings { get; set; }
+
+        public DbSet<Route> Routes { get; set; }
+
         /// <summary>
         /// Must concreate first for ef migrations
         /// </summary>
@@ -214,6 +220,35 @@ namespace Infrastructure.Persistences
            });
 
 
+            // Many Operations with many Settings
+            modelBuilder.Entity<Operation>()
+              .HasMany(i => i.Settings)
+              .WithMany(i => i.Operations)
+              .UsingEntity<OperationSetting>(
+              j => j
+                  .HasOne(w => w.Setting)
+                  .WithMany(w => w.OperationSettings)
+                  .HasForeignKey(w => w.SettingId)
+                  .OnDelete(DeleteBehavior.NoAction),
+              j => j
+                  .HasOne(w => w.Operation)
+                  .WithMany(w => w.OperationSettings)
+                  .HasForeignKey(w => w.OperationId)
+                  .OnDelete(DeleteBehavior.Cascade), // delete operation then delete settings
+              j =>
+              {
+                  j.Ignore(w => w.Id).HasKey(w => new { w.OperationId, w.SettingId });
+              });
+
+
+            // Flow has many Operations
+            modelBuilder.Entity<Flow>().ToTable("Flows").HasKey(c => c.Id);
+            modelBuilder.Entity<Operation>().HasOne(w => w.Flow).WithMany(w => w.Operations).HasForeignKey(w => w.FlowId);
+
+
+            // Operation has many Routes, Routes has FromOperation and ToOperation
+            modelBuilder.Entity<Route>().ToTable("Routes").HasKey(c => c.Id);
+            modelBuilder.Entity<Route>().HasOne(w => w.FromOperation).WithMany(w => w.Routes).HasForeignKey(w => w.FromOperationId);
         }
 
     }

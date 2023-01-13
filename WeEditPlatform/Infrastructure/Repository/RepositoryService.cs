@@ -294,5 +294,15 @@ namespace Infrastructure.Repository
             totalRecords = all.Count;
             return all;
         }
+
+        public T Find<T>(string rawSql) where T : EntityBase
+        {
+            return Database.GetDbSet<T>().FromSqlRaw(rawSql).FirstOrDefault();
+        }
+
+        public List<T> List<T>(string rawSql) where T : EntityBase
+        {
+            return Database.GetDbSet<T>().FromSqlRaw(rawSql).ToList();
+        }
     }
 }

@@ -24,6 +24,7 @@ namespace Testing
             .AddJsonFile("appsettings.json")
             .Build();
             _configuration = configuration;
+            var useInMemoryDb = configuration.GetValue<bool>("UseInMemoryDb");
 
             // Inject services, database in memory
             _serviceCollection = new ServiceCollection();
@@ -35,7 +36,10 @@ namespace Testing
             //_productionContext = _serviceProvider.GetRequiredService<ProductionContext>();
 
             // init master data
-            Init_Role_Shift_ProductLevel_Data();
+            if (useInMemoryDb)
+            {
+                Init_Role_Shift_ProductLevel_Data();
+            }
         }
 
         private void Init_Role_Shift_ProductLevel_Data()

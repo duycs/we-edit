@@ -1,12 +1,19 @@
-﻿using Application.Services;
+﻿using Application.Commands;
+using Application.Models;
+using Application.Services;
+using Infrastructure.Commands;
+using Infrastructure.Events;
+using Infrastructure.Models;
 using Infrastructure.Pagging;
 using Infrastructure.Persistences;
 using Infrastructure.Repository;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Reflection;
 
 namespace CrossCutting
 {
@@ -32,11 +39,20 @@ namespace CrossCutting
             services.AddTransient<IDatabaseService, ProductionContext>();
             services.AddScoped<IRepositoryService, RepositoryService>();
 
+            // Command
+            services.AddScoped<ICommandDispatcher, CommandDispatcher>();
+            services.AddScoped<IEventDispatcher, EventDispatcher>();
+            services.AddMediatR(typeof(AssignActionCommandHandler).GetTypeInfo().Assembly);
+            services.AddScoped<IRequestHandler<AssignActionCommand, InvokeResult>, AssignActionCommandHandler>();
+
             // Application: service usecase
             services.AddScoped<IJobService, JobService>();
             services.AddScoped<IStaffService, StaffService>();
             services.AddScoped<INoteService, NoteService>();
-
+            services.AddScoped<IOperationService, OperationService>();
+            services.AddScoped<ISettingService, SettingService>();
+            services.AddScoped<IFlowService, FlowService>();
+            services.AddScoped<IRouteService, RouteService>();
 
             // Present
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();

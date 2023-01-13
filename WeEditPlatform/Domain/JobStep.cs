@@ -89,9 +89,15 @@ namespace Domain
             return this;
         }
 
+        /// <summary>
+        /// Expried when startTime + estimation > current
+        /// </summary>
+        /// <returns></returns>
         public bool IsExpried()
         {
-            return StartTime.AddSeconds(EstimationInSeconds) > EndTime;
+            if (StartTime == default(DateTime) || StartTime == null) return true;
+
+            return StartTime.AddSeconds(EstimationInSeconds) > DateTime.UtcNow;
         }
 
         public void SetWorkerAtShift(int workerId, int shiftId)
