@@ -1,4 +1,6 @@
-﻿namespace Application.Operations
+﻿using Infrastructure.Models;
+
+namespace Application.Operations
 {
     /// <summary>
     /// PreProcessing prepare command -> Processing execute command -> PostProcess find route to toOperation
@@ -31,5 +33,7 @@
         /// <returns></returns>
         public abstract OperationBase IsValid();
         public abstract string GetMessage();
+
+        public abstract InvokeResult GetInvokeResult();
     }
 }

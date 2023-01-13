@@ -20,5 +20,10 @@
         {
             Success = false;
         }
+
+        public void SetSuccessTrue()
+        {
+            Success = true;
+        }
     }
 }

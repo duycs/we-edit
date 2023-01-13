@@ -96,6 +96,7 @@ namespace Application.Services
 
         public async Task<InvokeResult> Invoke(int id)
         {
+            var invokeResult = new InvokeResult(false);
             var message = new StringBuilder();
             try
             {
@@ -104,10 +105,10 @@ namespace Application.Services
                 if (operation == null)
                 {
                     message.AppendLine($"Operation {id} not found.");
+                    invokeResult.AddMessage(message.ToString());
+                    _logger.LogError(invokeResult.Message);
 
-                    _logger.LogError(message.ToString());
-
-                    return new InvokeResult(false, message.ToString());
+                    return invokeResult;
                 }
 
                 // active operation
@@ -122,18 +123,20 @@ namespace Application.Services
                 if (operationExecution == null)
                 {
                     message.AppendLine($"Not found Operation {id}, ExecutionName {operation.ExecutionName}.");
+                    invokeResult.AddMessage(message.ToString());
+                    invokeResult.SetSuccessFalse();
 
-                    return new InvokeResult(false, message.ToString());
+                    return invokeResult;
                 }
 
                 // PreProcessing prepare command -> Processing execute command -> PostProcess find route to toOperation
-                message.AppendLine($"Operation {id}. PreProcessing prepare command -> Processing execute command -> PostProcess find route to toOperation");
-
                 operationExecution.PreProcessing().IsValid().Processing().Result.IsValid().PostProcessing().IsValid();
 
-                var invokeResult = new InvokeResult(true, message.ToString());
+                invokeResult = new InvokeResult(true, message.ToString());
 
                 // add message operation after process
+                message.AppendLine($"Operation {id}. PreProcessing -> Processing -> PostProcess.");
+                invokeResult.AddMessage(message.ToString());
                 invokeResult.AddMessage(operationExecution.GetMessage());
 
                 return invokeResult;

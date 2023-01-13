@@ -11,6 +11,11 @@ namespace Application.Operations
 {
     public class NotImplementOperation : OperationBase
     {
+        public override InvokeResult GetInvokeResult()
+        {
+            throw new NotImplementedException();
+        }
+
         public override string GetMessage()
         {
             throw new NotImplementedException();

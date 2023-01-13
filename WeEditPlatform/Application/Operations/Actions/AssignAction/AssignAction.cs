@@ -62,7 +62,6 @@ namespace Application.Operations.Actions.AssignAction
 
         public override async Task<OperationBase> Processing()
         {
-
             _invokeResult = await _commandDispatcher.SendGetResponse(_command);
 
             _message.AppendLine($"Operation {_operation.Id}. Processing");
@@ -97,6 +96,11 @@ namespace Application.Operations.Actions.AssignAction
         public override string GetMessage()
         {
             return _message.ToString();
+        }
+
+        public override InvokeResult GetInvokeResult()
+        {
+            return _invokeResult;
         }
     }
 }
