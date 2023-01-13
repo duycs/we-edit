@@ -2,7 +2,7 @@
 using Infrastructure.Commands;
 using Infrastructure.Models;
 
-namespace Application.Commands
+namespace Application.Operations.Actions.AssignAction
 {
     public class AssignActionCommand : CommandResponse<InvokeResult>
     {

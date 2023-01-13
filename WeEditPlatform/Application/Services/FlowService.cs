@@ -89,26 +89,28 @@ namespace Application.Services
         /// <returns></returns>
         public async Task<InvokeResult> RunFlow(int id)
         {
-            string message = "";
+            var message = new StringBuilder();
             try
             {
                 var flow = _repositoryService.Find(id, new FlowSpecification(true));
 
                 if (flow == null)
                 {
-                    message = $"Flow {id} not found";
-                    _logger.LogError(message);
+                    message.AppendLine($"Flow {id} not found");
 
-                    return new InvokeResult(false, message);
+                    _logger.LogError(message.ToString());
+
+                    return new InvokeResult(false, message.ToString());
                 }
 
                 var firstRouteOperation = flow.FirstRouteOperation();
                 if (firstRouteOperation == null)
                 {
-                    message = $"Flow {id}. Do not exist any Operations";
-                    _logger.LogError(message);
+                    message.AppendLine($"Flow {id}. Do not exist any Operations");
 
-                    return new InvokeResult(false, message);
+                    _logger.LogError(message.ToString());
+
+                    return new InvokeResult(false, message.ToString());
                 }
 
                 // Fire first Operaion
@@ -117,6 +119,9 @@ namespace Application.Services
 
                 // eg: invoke A
                 var operationInvokeResult = await _operationService.Invoke(firstRouteOperation.Id);
+
+                message.AppendLine(@$"Invoke first Operation {firstRouteOperation.Id}. Success: {operationInvokeResult.Success}.");
+
                 if (!operationInvokeResult.Success)
                 {
                     return new InvokeResult(false, operationInvokeResult.Message);
@@ -128,31 +133,31 @@ namespace Application.Services
                     // invoke B
                     operationInvokeResult = await _operationService.Invoke(fromOperationRoute.ToOperationId);
 
-                    message = @$"Invoke Operation {fromOperationRoute.ToOperationId}. Success: {operationInvokeResult.Success}.";
-                    _logger.LogInformation(message);
+                    message.AppendLine(@$"Invoke Operation {fromOperationRoute.ToOperationId}. Success: {operationInvokeResult.Success}.");
 
                     // eg: route B -> C
                     fromOperationRoute = _routeService.FindRoutesOfFromOperation(fromOperationRoute.ToOperationId).FirstOrDefault();
 
                     if (fromOperationRoute != null)
                     {
-                        message = @$"Route: from Operation {fromOperationRoute.FromOperationId} to Operation {fromOperationRoute.ToOperationId}.";
-                        _logger.LogInformation(message);
+                        message.AppendLine(@$"Route: from Operation {fromOperationRoute.FromOperationId} to Operation {fromOperationRoute.ToOperationId}.");
                     }
                 }
 
                 // End route then exit the Flow
-                message = $"End Route. Exit Flow {id}";
-                _logger.LogInformation(message);
+                message.AppendLine($"End Route. Exit Flow {id}");
 
-                return new InvokeResult(true, message);
+                _logger.LogInformation(message.ToString());
+
+                return new InvokeResult(true, message.ToString());
             }
             catch (Exception ex)
             {
-                message = ex.ToString();
-                _logger.LogError(message);
+                message.AppendLine(ex.ToString());
 
-                return new InvokeResult(false, message);
+                _logger.LogError(message.ToString());
+
+                return new InvokeResult(false, message.ToString());
             }
         }
     }
