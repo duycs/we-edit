@@ -15,5 +15,10 @@
         {
             Message += $"\n{message}";
         }
+
+        public void SetSuccessFalse()
+        {
+            Success = false;
+        }
     }
 }
