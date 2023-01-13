@@ -1,9 +1,4 @@
 ﻿using Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Extensions
 {
@@ -11,7 +6,14 @@ namespace Infrastructure.Extensions
     {
         public static string GetValueSettingByKey(this List<Setting> settings, string key)
         {
-            return settings.FirstOrDefault(s => s.Key != null && s.Key == key).Value;
+            var setting = settings.FirstOrDefault(s => s.Key != null && s.Key.ToLower() == key.ToLower());
+
+            if (setting == null)
+            {
+                throw new Exception($"Not found Setting key {key}");
+            }
+
+            return setting.Value;
         }
     }
 }

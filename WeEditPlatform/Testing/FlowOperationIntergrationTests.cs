@@ -8,7 +8,7 @@ using NUnit.Framework;
 
 namespace Testing
 {
-    public class OperationIntergrationTests : TestBase
+    public class FlowOperationIntergrationTests : TestBase
     {
         private IOperationService _operationService;
         private IFlowService _flowService;
@@ -82,6 +82,16 @@ namespace Testing
             Assert.NotNull(operationCreated.Uid);
 
             _operationService.Invoke(operationCreated.Id);
+        }
+
+        [Test]
+        [TestCase(1)]
+        public void Run_Flow_Success(int flowId)
+        {
+            var invokeResult = _flowService.RunFlow(flowId).Result;
+
+            Assert.NotNull(invokeResult);
+            Assert.IsTrue(invokeResult.Success);
         }
 
     }

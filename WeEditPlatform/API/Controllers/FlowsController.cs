@@ -76,5 +76,18 @@ namespace API.Controllers
             _flowService.RemoveFlow(id);
             return Ok();
         }
+
+        /// <summary>
+        /// Instant invoke flow operations
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [Authorize(Policy = "staffPolicy")]
+        [HttpPost("instant")]
+        public async Task<IActionResult> RunFlow([FromBody] InstantFlowVM request)
+        {
+            var result = await _flowService.RunFlow(request.FlowId);
+            return Ok(result);
+        }
     }
 }

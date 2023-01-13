@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Infrastructure.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,6 @@ namespace Infrastructure.Commands
     public interface ICommandDispatcher
     {
         Task Send<T>(T command) where T : Command;
-        Task<string> SendGetResponse<T>(T command) where T : CommandResponse<string>;
+        Task<InvokeResult> SendGetResponse<T>(T command) where T : CommandResponse<InvokeResult>;
     }
 }

@@ -1,18 +1,31 @@
 ﻿using Application.Models;
 using Application.Queries;
 using Domain;
+using Infrastructure.Models;
 using Infrastructure.Pagging;
 using Infrastructure.Repository;
+using Microsoft.Extensions.Logging;
+using System.Text;
 
 namespace Application.Services
 {
     public class FlowService : IFlowService
     {
+        private readonly ILogger<FlowService> _logger;
         private readonly IRepositoryService _repositoryService;
+        private readonly IRouteService _routeService;
+        private readonly IOperationService _operationService;
 
-        public FlowService(IRepositoryService repositoryService)
+        public FlowService(ILogger<FlowService> logger,
+            IRepositoryService repositoryService,
+            IRouteService routeService,
+            IOperationService operationService
+            )
         {
+            _logger = logger;
             _repositoryService = repositoryService;
+            _routeService = routeService;
+            _operationService = operationService;
         }
 
         public Flow CreateFlow(CreateFlowVM request)
@@ -67,6 +80,80 @@ namespace Application.Services
 
             _repositoryService.Delete(flow);
             _repositoryService.SaveChanges();
+        }
+
+        /// <summary>
+        /// Run Flow from from First to End of Operations via Routes
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<InvokeResult> RunFlow(int id)
+        {
+            string message = "";
+            try
+            {
+                var flow = _repositoryService.Find(id, new FlowSpecification(true));
+
+                if (flow == null)
+                {
+                    message = $"Flow {id} not found";
+                    _logger.LogError(message);
+
+                    return new InvokeResult(false, message);
+                }
+
+                var firstRouteOperation = flow.FirstRouteOperation();
+                if (firstRouteOperation == null)
+                {
+                    message = $"Flow {id}. Do not exist any Operations";
+                    _logger.LogError(message);
+
+                    return new InvokeResult(false, message);
+                }
+
+                // Fire first Operaion
+                // eg: first Route: A -> B
+                var fromOperationRoute = _routeService.FindRoutesOfFromOperation(firstRouteOperation.Id).FirstOrDefault();
+
+                // eg: invoke A
+                var operationInvokeResult = await _operationService.Invoke(firstRouteOperation.Id);
+                if (!operationInvokeResult.Success)
+                {
+                    return new InvokeResult(false, operationInvokeResult.Message);
+                }
+
+                // Next Operation if current Operation is success and next Route existing
+                while (operationInvokeResult.Success && fromOperationRoute != null)
+                {
+                    // invoke B
+                    operationInvokeResult = await _operationService.Invoke(fromOperationRoute.ToOperationId);
+
+                    message = @$"Invoke Operation {fromOperationRoute.ToOperationId}. Success: {operationInvokeResult.Success}.";
+                    _logger.LogInformation(message);
+
+                    // eg: route B -> C
+                    fromOperationRoute = _routeService.FindRoutesOfFromOperation(fromOperationRoute.ToOperationId).FirstOrDefault();
+
+                    if (fromOperationRoute != null)
+                    {
+                        message = @$"Route: from Operation {fromOperationRoute.FromOperationId} to Operation {fromOperationRoute.ToOperationId}.";
+                        _logger.LogInformation(message);
+                    }
+                }
+
+                // End route then exit the Flow
+                message = $"End Route. Exit Flow {id}";
+                _logger.LogInformation(message);
+
+                return new InvokeResult(true, message);
+            }
+            catch (Exception ex)
+            {
+                message = ex.ToString();
+                _logger.LogError(message);
+
+                return new InvokeResult(false, message);
+            }
         }
     }
 }

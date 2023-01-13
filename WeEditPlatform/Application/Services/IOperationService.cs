@@ -1,5 +1,6 @@
 ﻿using Application.Models;
 using Domain;
+using Infrastructure.Models;
 
 namespace Application.Services
 {
@@ -16,6 +17,8 @@ namespace Application.Services
         Operation UpdateOperation(UpdateOperationVM request);
         void RemoveOperation(int id);
 
-        void Invoke(int id);
+        Task<InvokeResult> Invoke(int id);
+
+        void SetActiveOperation(int id);
     }
 }

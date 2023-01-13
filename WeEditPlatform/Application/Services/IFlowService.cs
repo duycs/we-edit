@@ -1,5 +1,6 @@
 ﻿using Application.Models;
 using Domain;
+using Infrastructure.Models;
 
 namespace Application.Services
 {
@@ -11,5 +12,7 @@ namespace Application.Services
         List<Flow> FindFlows(int[] ids, bool isInclude);
         List<Flow> FindFlows(int pageNumber, int pageSize, string columnOrders, string searchValue, bool isInclude, out int totalRecords);
         void RemoveFlow(int id);
+        Task<InvokeResult> RunFlow(int id);
+
     }
 }

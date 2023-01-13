@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Infrastructure.Models;
+using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +33,7 @@ namespace Infrastructure.Commands
             return _mediator.Send(command);
         }
 
-        async Task<string> ICommandDispatcher.SendGetResponse<T>(T command)
+        async Task<InvokeResult> ICommandDispatcher.SendGetResponse<T>(T command)
         {
             return await _mediator.Send(command);
         }

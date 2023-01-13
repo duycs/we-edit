@@ -1,8 +1,10 @@
-﻿using Infrastructure.Commands;
+﻿using Application.Models;
+using Infrastructure.Commands;
+using Infrastructure.Models;
 
 namespace Application.Commands
 {
-    public class AssignActionCommand : Command
+    public class AssignActionCommand : CommandResponse<InvokeResult>
     {
         public string MatchingAssignSetting { get; set; }
         public string RawSqlFilterJobStep { get; set; }

@@ -1,7 +1,9 @@
 ﻿using Application.Commands;
+using Application.Models;
 using Application.Services;
 using Infrastructure.Commands;
 using Infrastructure.Events;
+using Infrastructure.Models;
 using Infrastructure.Pagging;
 using Infrastructure.Persistences;
 using Infrastructure.Repository;
@@ -41,7 +43,7 @@ namespace CrossCutting
             services.AddScoped<ICommandDispatcher, CommandDispatcher>();
             services.AddScoped<IEventDispatcher, EventDispatcher>();
             services.AddMediatR(typeof(AssignActionCommandHandler).GetTypeInfo().Assembly);
-            services.AddScoped<IRequestHandler<AssignActionCommand>, AssignActionCommandHandler>();
+            services.AddScoped<IRequestHandler<AssignActionCommand, InvokeResult>, AssignActionCommandHandler>();
 
             // Application: service usecase
             services.AddScoped<IJobService, JobService>();
@@ -50,6 +52,7 @@ namespace CrossCutting
             services.AddScoped<IOperationService, OperationService>();
             services.AddScoped<ISettingService, SettingService>();
             services.AddScoped<IFlowService, FlowService>();
+            services.AddScoped<IRouteService, RouteService>();
 
             // Present
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();

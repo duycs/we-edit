@@ -52,7 +52,16 @@ namespace Domain
             }
 
             return this;
+        }
 
+        public Operation? FirstRouteOperation()
+        {
+            if (Operations == null || !Operations.Any()) return null;
+
+            // only once Operation then this is the first
+            if (Operations.Count == 1) return Operations.First();
+
+            return Operations.FirstOrDefault(o => o.IsFirstRoute());
         }
     }
 }

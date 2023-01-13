@@ -26,6 +26,8 @@ namespace Infrastructure.Persistences
         public DbSet<Setting> Settings { get; set; }
         public DbSet<OperationSetting> OperationSettings { get; set; }
 
+        public DbSet<Route> Routes { get; set; }
+
         /// <summary>
         /// Must concreate first for ef migrations
         /// </summary>
@@ -54,6 +56,7 @@ namespace Infrastructure.Persistences
             {
                 // TODO: Hardcode connection string for migration CLI 
                 // Set Allow User Variables = True, For solve issue when migrations: MySql.Data.MySqlClient.MySqlException (0x80004005): Parameter @X must be defined.
+
             }
         }
 
@@ -237,10 +240,14 @@ namespace Infrastructure.Persistences
               });
 
 
-            modelBuilder.Entity<Flow>().ToTable("Flows").HasKey(c => c.Id);
-
             // Flow has many Operations
+            modelBuilder.Entity<Flow>().ToTable("Flows").HasKey(c => c.Id);
             modelBuilder.Entity<Operation>().HasOne(w => w.Flow).WithMany(w => w.Operations).HasForeignKey(w => w.FlowId);
+
+
+            // Operation has many Routes, Routes has FromOperation and ToOperation
+            modelBuilder.Entity<Route>().ToTable("Routes").HasKey(c => c.Id);
+            modelBuilder.Entity<Route>().HasOne(w => w.FromOperation).WithMany(w => w.Routes).HasForeignKey(w => w.FromOperationId);
         }
 
     }

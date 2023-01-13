@@ -2,6 +2,7 @@
 using Application.Queries;
 using Domain;
 using Infrastructure.Events;
+using Infrastructure.Models;
 using Infrastructure.Repository;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -9,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace Application.Commands
 {
-    public class AssignActionCommandHandler : IRequestHandler<AssignActionCommand>
+    public class AssignActionCommandHandler : IRequestHandler<AssignActionCommand, InvokeResult>
     {
         private readonly IRepositoryService _repositoryService;
         private readonly IEventDispatcher _eventDispatcher;
@@ -23,75 +24,93 @@ namespace Application.Commands
             _logger = logger;
         }
 
-        public async Task<Unit> Handle(AssignActionCommand request, CancellationToken cancellationToken)
+        public async Task<InvokeResult> Handle(AssignActionCommand request, CancellationToken cancellationToken)
         {
-            // Filter JobStep action
-            var filterJobStepIds = _repositoryService.List<JobStep>(request.RawSqlFilterJobStep).Select(s => s.Id).ToArray();
-            var filterJobSteps = _repositoryService.List<JobStep>(filterJobStepIds);
+            string message = "";
 
-            // And Not Expired time
-            if (!string.IsNullOrEmpty(request.ValidJobStepIsExpriedMethod))
+            try
             {
-                filterJobSteps = filterJobSteps.Where(s => !s.IsExpried()).ToList();
-            }
+                // Filter JobStep action
+                var filterJobStepIds = _repositoryService.List<JobStep>(request.RawSqlFilterJobStep).Select(s => s.Id).ToArray();
+                var filterJobSteps = _repositoryService.List<JobStep>(filterJobStepIds);
 
-            // Filter Staff action
-            var filterStaffIds = _repositoryService.List<Staff>(request.RawSqlFilterStaff).Select(s => s.Id).ToArray();
-            var filterStaffs = _repositoryService.List<Staff>(filterStaffIds, new StaffSpecification(true)).ToList();
-
-            // Assign Action execute from output of FilterJobStep and FilterStaff actions
-            if (filterJobSteps == null || !filterJobSteps.Any() || filterStaffs == null || !filterStaffs.Any())
-            {
-                _logger.LogInformation($"filterJobSteps count: {filterJobSteps?.Count}, filterStaffs count: {filterStaffs?.Count}");
-                return Unit.Value;
-            }
-
-            // Assign action
-            var matchingAssignSetting = JsonConvert.DeserializeObject<MatchingAssignSetting>(request.MatchingAssignSetting);
-            var steps = _repositoryService.All<Step>();
-            while (filterStaffs != null && filterStaffs.Any())
-            {
-                _logger.LogInformation($"In While filterStaffs count : {filterStaffs?.Count}");
-
-                foreach (var jobStep in filterJobSteps)
+                // And Not Expired time
+                if (!string.IsNullOrEmpty(request.ValidJobStepIsExpriedMethod))
                 {
-                    var step = steps.FirstOrDefault(s => s.Id == jobStep.StepId);
+                    filterJobSteps = filterJobSteps.Where(s => !s.IsExpried()).ToList();
+                }
 
-                    // And Group matching
-                    if (matchingAssignSetting.IsGroupMatching)
+                // Filter Staff action
+                var filterStaffIds = _repositoryService.List<Staff>(request.RawSqlFilterStaff).Select(s => s.Id).ToArray();
+                var filterStaffs = _repositoryService.List<Staff>(filterStaffIds, new StaffSpecification(true)).ToList();
+
+                // Assign Action execute from output of FilterJobStep and FilterStaff actions
+                if (filterJobSteps == null || !filterJobSteps.Any() || filterStaffs == null || !filterStaffs.Any())
+                {
+                    message = $"filterJobSteps count: {filterJobSteps?.Count}, filterStaffs count: {filterStaffs?.Count}";
+                    _logger.LogInformation(message);
+
+                    return new InvokeResult(true, message);
+                }
+
+                // Assign action
+                var matchingAssignSetting = JsonConvert.DeserializeObject<MatchingAssignSetting>(request.MatchingAssignSetting);
+                var steps = _repositoryService.All<Step>();
+                var assignedStaffs = new List<Staff>();
+                while (filterStaffs != null && filterStaffs.Any())
+                {
+                    message = $"In While filterStaffs count : {filterStaffs?.Count}.";
+                    _logger.LogInformation(message);
+
+                    foreach (var jobStep in filterJobSteps)
                     {
-                        filterStaffs = filterStaffs.Where(s => s.Groups != null && s.Groups.Select(g => g.Id).Contains(step.GroupId)).ToList();
-                    }
+                        var step = steps.FirstOrDefault(s => s.Id == jobStep.StepId);
 
-                    // And ProductLevel matching
-                    if (matchingAssignSetting.IsProductLevelMatching)
-                    {
-                        filterStaffs = filterStaffs.Where(s => s.ProductLevels != null &&
-                            s.ProductLevels.Contains(step.ProductLevel)).ToList();
-                    }
+                        // And Group matching
+                        if (matchingAssignSetting != null && matchingAssignSetting.IsGroupMatching)
+                        {
+                            filterStaffs = filterStaffs.Where(s => s.Groups != null && s.Groups.Select(g => g.Id).Contains(step.GroupId)).ToList();
+                        }
 
-                    if (filterStaffs != null && filterStaffs.Any())
-                    {
-                        var matchedStaff = filterStaffs.FirstOrDefault();
+                        // And ProductLevel matching
+                        if (matchingAssignSetting != null && matchingAssignSetting.IsProductLevelMatching)
+                        {
+                            filterStaffs = filterStaffs.Where(s => s.ProductLevels != null &&
+                                s.ProductLevels.Contains(step.ProductLevel)).ToList();
+                        }
 
-                        // Assign staff to step, set status Assigned
-                        jobStep.SetWorkerAtShift(matchedStaff.Id, matchedStaff.GetCurrentShift().Id);
-                        jobStep.UpdateStatus(StepStatus.Assigned);
-                        jobStep.SetEstimationInSeconds(step.EstimationInSeconds);
-                        matchedStaff.SetAssigned();
+                        if (filterStaffs != null && filterStaffs.Any())
+                        {
+                            var matchedStaff = filterStaffs.FirstOrDefault();
 
-                        // save update assigned
-                        _repositoryService.Update(jobStep);
-                        _repositoryService.Update(matchedStaff);
-                        _repositoryService.SaveChanges();
+                            // Assign staff to step, set status Assigned
+                            jobStep.SetWorkerAtShift(matchedStaff.Id, matchedStaff.GetCurrentShift().Id);
+                            jobStep.UpdateStatus(StepStatus.Assigned);
+                            jobStep.SetEstimationInSeconds(step.EstimationInSeconds);
+                            matchedStaff.SetAssigned();
 
-                        // remove assigned staff
-                        filterStaffs.Remove(matchedStaff);
+                            // save update assigned
+                            _repositoryService.Update(jobStep);
+                            _repositoryService.Update(matchedStaff);
+                            _repositoryService.SaveChanges();
+
+                            // remove assigned staff
+                            filterStaffs.Remove(matchedStaff);
+
+                            assignedStaffs.Add(matchedStaff);
+                        }
                     }
                 }
-            }
 
-            return Unit.Value;
+                message = $"assignedStaffIds: {string.Join(",", assignedStaffs.Select(s => s.Id))}.";
+                _logger.LogInformation(message);
+
+                return new InvokeResult(true, message);
+            }
+            catch (Exception ex)
+            {
+                return new InvokeResult(false, ex.Message.ToString());
+            }
         }
 
     }

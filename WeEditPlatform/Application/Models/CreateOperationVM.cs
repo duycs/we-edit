@@ -10,5 +10,6 @@ namespace Application.Models
         public string? Description { get; set; }
         public string? ExecutionName { get; set; }
         public Setting[]? Settings { get; set; }
+        public bool FirstRoute { get; set; }
     }
 }
