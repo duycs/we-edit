@@ -4,8 +4,8 @@
     public enum ExecutionName
     {
         NotImplement,
-        FilterStaff,
-        FilterJobStep,
         AssignAction,
+        GetStaffAction,
+        GetJobStepAction,
     }
 }

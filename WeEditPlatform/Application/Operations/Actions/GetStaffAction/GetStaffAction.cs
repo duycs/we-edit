@@ -8,17 +8,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Operations
+namespace Application.Operations.Actions.GetStaffAction
 {
-    public class NotImplementOperation : OperationBase
+    public class GetStaffAction : OperationBase
     {
-        public NotImplementOperation(Operation operation, InvokeResult invokeResult, ILogger logger, ICommandDispatcher commandDispatcher) : base(operation, invokeResult, logger, commandDispatcher)
+        public GetStaffAction(Operation operation, InvokeResult invokeResult, ILogger logger, ICommandDispatcher commandDispatcher) : base(operation, invokeResult, logger, commandDispatcher)
         {
-        }
-
-        public override OperationBase PostProcessing()
-        {
-            throw new NotImplementedException();
         }
 
         public override OperationBase PreProcessing()
@@ -30,5 +25,11 @@ namespace Application.Operations
         {
             throw new NotImplementedException();
         }
+
+        public override OperationBase PostProcessing()
+        {
+            throw new NotImplementedException();
+        }
+      
     }
 }
