@@ -91,7 +91,7 @@ namespace Testing
             var invokeResult = _flowService.RunFlow(flowId).Result;
 
             Assert.NotNull(invokeResult);
-            Assert.IsTrue(invokeResult.Success);
+            Assert.IsTrue(invokeResult.IsSuccess());
         }
 
     }

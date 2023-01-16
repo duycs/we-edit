@@ -1,5 +1,4 @@
-﻿using Application.Models;
-using Application.Queries;
+﻿using Application.Queries;
 using Domain;
 using Infrastructure.Events;
 using Infrastructure.Models;
@@ -25,12 +24,21 @@ namespace Application.Operations.Actions.AssignAction
             _logger = logger;
         }
 
-        public async Task<InvokeResult> Handle(AssignActionCommand request, CancellationToken cancellationToken)
+        /// <summary>
+        ///  default invoke resturn success true, exception return false
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public Task<InvokeResult> Handle(AssignActionCommand request, CancellationToken cancellationToken)
         {
-            var message = new StringBuilder();
+            // default success, false if have an exception 
+            var invokeResult = new InvokeResult(true);
 
             try
             {
+                invokeResult.AddMessage("AssignAction handler");
+
                 // Filter JobStep action
                 var filterJobStepIds = _repositoryService.List<JobStep>(request.RawSqlFilterJobStep).Select(s => s.Id).ToArray();
                 var filterJobSteps = _repositoryService.List<JobStep>(filterJobStepIds);
@@ -48,11 +56,11 @@ namespace Application.Operations.Actions.AssignAction
                 // Assign Action execute from output of FilterJobStep and FilterStaff actions
                 if (filterJobSteps == null || !filterJobSteps.Any() || filterStaffs == null || !filterStaffs.Any())
                 {
-                    message.Append($"filterJobSteps count: {filterJobSteps?.Count}, filterStaffs count: {filterStaffs?.Count}");
+                    invokeResult.AddMessage($"filterJobSteps count: {filterJobSteps?.Count}, filterStaffs count: {filterStaffs?.Count}");
 
-                    _logger.LogInformation(message.ToString());
+                    _logger.LogInformation(invokeResult.GetMessage());
 
-                    return new InvokeResult(true, message.ToString());
+                    return Task.FromResult(invokeResult);
                 }
 
                 // Assign action
@@ -61,7 +69,7 @@ namespace Application.Operations.Actions.AssignAction
                 var assignedStaffs = new List<Staff>();
                 while (filterStaffs != null && filterStaffs.Any())
                 {
-                    message.AppendLine($"In While filterStaffs count : {filterStaffs?.Count}.");
+                    invokeResult.AddMessage($"In While filterStaffs count : {filterStaffs?.Count}");
 
                     foreach (var jobStep in filterJobSteps)
                     {
@@ -103,19 +111,19 @@ namespace Application.Operations.Actions.AssignAction
                     }
                 }
 
-                message.AppendLine($"assignedStaffIds: {string.Join(",", assignedStaffs.Select(s => s.Id))}.");
+                invokeResult.AddMessage($"assignedStaffIds: {string.Join(",", assignedStaffs.Select(s => s.Id))}");
 
-                _logger.LogInformation(message.ToString());
+                _logger.LogInformation(invokeResult.GetMessage());
 
-                return new InvokeResult(true, message.ToString());
+                return Task.FromResult(invokeResult);
             }
             catch (Exception ex)
             {
-                message.AppendLine(ex.Message.ToString());
+                invokeResult.AddMessage(ex.Message.ToString()).SetSuccessFalse();
 
-                _logger.LogError(message.ToString());
+                _logger.LogError(invokeResult.GetMessage());
 
-                return new InvokeResult(false, message.ToString());
+                return Task.FromResult(invokeResult);
             }
         }
 

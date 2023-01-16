@@ -3,6 +3,7 @@ using Application.Operations;
 using Application.Queries;
 using Domain;
 using Infrastructure.Commands;
+using Infrastructure.Exceptions;
 using Infrastructure.Models;
 using Infrastructure.Repository;
 using Microsoft.Extensions.Logging;
@@ -34,7 +35,7 @@ namespace Application.Services
             var flow = _repositoryService.Find<Flow>(request.FlowId);
             if (flow == null)
             {
-                throw new Exception($"Flow {request.FlowId} not found");
+                throw new OperationException($"Flow {request.FlowId} not found");
             }
 
             var operation = _repositoryService.Add(Operation.Create(flow, request.Type, request.Name, request.Description,
@@ -55,7 +56,7 @@ namespace Application.Services
 
             if (operation == null)
             {
-                throw new Exception($"Operation {id} not found");
+                throw new OperationException($"Operation {id} not found");
             }
 
             _repositoryService.Delete(operation);
@@ -68,7 +69,7 @@ namespace Application.Services
 
             if (operation == null)
             {
-                throw new Exception($"Operation {request.Id} not found");
+                throw new OperationException($"Operation {request.Id} not found");
             }
 
             var operationUpdated = operation.Update(request.Type, request.Name, request.Description,
@@ -86,7 +87,7 @@ namespace Application.Services
 
             if (operation == null)
             {
-                throw new Exception($"Operation {id} not found");
+                throw new OperationException($"Operation {id} not found");
             }
 
             operation.SetActive();
@@ -96,55 +97,52 @@ namespace Application.Services
 
         public async Task<InvokeResult> Invoke(int id)
         {
-            var message = new StringBuilder();
+            var invokeResult = new InvokeResult(false);
             try
             {
                 var operation = _repositoryService.Find(id, new OperationSpecification(true));
 
                 if (operation == null)
                 {
-                    message.AppendLine($"Operation {id} not found.");
+                    invokeResult.AddMessage($"Operation {id} not found").SetSuccessFalse();
 
-                    _logger.LogError(message.ToString());
+                    _logger.LogError(invokeResult.GetMessage());
 
-                    return new InvokeResult(false, message.ToString());
+                    return invokeResult;
                 }
+
+                invokeResult = new InvokeResult(true, operation);
 
                 // active operation
                 operation.SetActive();
                 _repositoryService.Update(operation);
                 _repositoryService.SaveChanges();
 
-                message.AppendLine($"Active Operation {id}. ExecutionName {operation.ExecutionName}.");
+                invokeResult.AddMessage("Active Operation");
 
-                var operationExecution = new OperationFactory(operation, _logger, _commandDispatcher).GetOperationBasedOnOperation();
+                var operationExecution = new OperationFactory(operation, invokeResult, _logger, _commandDispatcher).GetOperationBasedOnOperation();
 
                 if (operationExecution == null)
                 {
-                    message.AppendLine($"Not found Operation {id}, ExecutionName {operation.ExecutionName}.");
+                    invokeResult.AddMessage($"Not found ExecutionName {operation.ExecutionName}").SetSuccessFalse();
 
-                    return new InvokeResult(false, message.ToString());
+                    _logger.LogInformation(invokeResult.GetMessage());
+
+                    return invokeResult;
                 }
 
                 // PreProcessing prepare command -> Processing execute command -> PostProcess find route to toOperation
-                message.AppendLine($"Operation {id}. PreProcessing prepare command -> Processing execute command -> PostProcess find route to toOperation");
-
-                operationExecution.PreProcessing().IsValid().Processing().Result.IsValid().PostProcessing().IsValid();
-
-                var invokeResult = new InvokeResult(true, message.ToString());
-
-                // add message operation after process
-                invokeResult.AddMessage(operationExecution.GetMessage());
+                invokeResult = operationExecution.PreProcessing().IsValid().Processing().Result.IsValid().PostProcessing().IsValid().GetInvokeResult();
 
                 return invokeResult;
             }
             catch (Exception ex)
             {
-                message.AppendLine(ex.ToString());
+                invokeResult.AddMessage(ex.ToString()).SetSuccessFalse();
 
-                _logger.LogError(message.ToString());
+                _logger.LogError(invokeResult.GetMessage());
 
-                return new InvokeResult(false, message.ToString());
+                return invokeResult;
             }
         }
 

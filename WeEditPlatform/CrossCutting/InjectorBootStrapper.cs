@@ -1,5 +1,6 @@
 ﻿using Application.Models;
 using Application.Operations.Actions.AssignAction;
+using Application.Operations.Actions.GetJobStepAction;
 using Application.Services;
 using Infrastructure.Commands;
 using Infrastructure.Events;
@@ -44,7 +45,9 @@ namespace CrossCutting
             services.AddScoped<ICommandDispatcher, CommandDispatcher>();
             services.AddScoped<IEventDispatcher, EventDispatcher>();
             services.AddMediatR(typeof(AssignActionCommandHandler).GetTypeInfo().Assembly);
+            services.AddMediatR(typeof(GetJobStepCommandHandler).GetTypeInfo().Assembly);
             services.AddScoped<IRequestHandler<AssignActionCommand, InvokeResult>, AssignActionCommandHandler>();
+            services.AddScoped<IRequestHandler<GetJobStepActionCommand, InvokeResult>, GetJobStepCommandHandler>();
 
             // Application: service usecase
             services.AddScoped<IJobService, JobService>();
