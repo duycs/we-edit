@@ -1,5 +1,6 @@
 ﻿using Infrastructure.Persistences;
 using Infrastructure.Repository;
+using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,6 +28,8 @@ namespace CrossCutting
             // Persistence: generic repository
             services.AddTransient<IDatabaseService, ProductionContext>();
             services.AddScoped<IRepositoryService, RepositoryService>();
+
+            services.AddScoped<IWatermark, Watermark>();
         }
     }
 }

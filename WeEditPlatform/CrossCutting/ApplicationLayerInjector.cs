@@ -1,4 +1,5 @@
 ﻿using Application.Operations.Actions.AssignAction;
+using Application.Operations.Actions.CreateWatermarkAction;
 using Application.Operations.Actions.GetJobStepAction;
 using Application.Services;
 using Infrastructure.Commands;
@@ -23,6 +24,10 @@ namespace CrossCutting
             services.AddMediatR(typeof(GetJobStepCommandHandler).GetTypeInfo().Assembly);
             services.AddScoped<IRequestHandler<AssignActionCommand, InvokeResult>, AssignActionCommandHandler>();
             services.AddScoped<IRequestHandler<GetJobStepActionCommand, InvokeResult>, GetJobStepCommandHandler>();
+
+            services.AddScoped<IRequestHandler<CreateCombineWatermarkCommand>, CreateCombineWatermarkCommandHandler>();
+            services.AddScoped<IRequestHandler<CreateTextWatermarkCommand>, CreateTextWatermarkCommandHandler>();
+            services.AddScoped<IRequestHandler<CreateImageWatermarkCommand>, CreateImageWatermarkCommandHandler>();
 
             // services
             services.AddScoped<IJobService, JobService>();

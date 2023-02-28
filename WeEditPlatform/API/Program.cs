@@ -2,6 +2,7 @@ using Application.Services;
 using CrossCutting;
 using Infrastructure.Persistences;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.FileProviders;
 using Serilog;
 using System.Text.Json.Serialization;
 
@@ -110,6 +111,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.UseStaticFiles(new StaticFileOptions()
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"Resources")),
+    RequestPath = new PathString("/Resources")
+});
 
 app.MapHub<APIHub>("/apishub");
 

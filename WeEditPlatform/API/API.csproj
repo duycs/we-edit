@@ -43,4 +43,8 @@
 		</None>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Resources\Images\Watermarks\Temp\" />
+	</ItemGroup>
+
 </Project>
