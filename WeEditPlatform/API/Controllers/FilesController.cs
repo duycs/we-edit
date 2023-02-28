@@ -83,7 +83,7 @@ namespace Houzz.Api.Controllers.WebControllers
                 var pathToRead = Path.Combine(Directory.GetCurrentDirectory(), folderName);
                 var photos = Directory.EnumerateFiles(pathToRead)
                     .Where(IsAPhotoFile)
-                    .Select(fullPath => new PhotoDto(Path.Combine(folderName, Path.GetFileName(fullPath)))).ToArray();
+                    .Select(fullPath => new PhotoDto(@$"{Path.Combine(folderName, Path.GetFileName(fullPath))}?{DateTime.UtcNow.Ticks}")).ToArray();
 
                 return Ok(photos);
             }
