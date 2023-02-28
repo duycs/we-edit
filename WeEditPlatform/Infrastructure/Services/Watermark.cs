@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Drawing;
 using LazZiya.ImageResize;
+using Microsoft.AspNetCore.Components.Forms;
+using Org.BouncyCastle.Utilities.Encoders;
 
 namespace Infrastructure.Services
 {
@@ -12,37 +14,38 @@ namespace Infrastructure.Services
 
         public string CreateCombineWatermark(string inputFile, string textWatermark, TextMarkOptions textMarkOptions, string imageWatermark, ImageMarkOptions imageMarkOptions)
         {
-            var textWatermarked = CreateTextWatermark(inputFile, textWatermark, textMarkOptions);
-            var imageWatermarked = CreateImageWatermark(textWatermarked, imageWatermark, imageMarkOptions);
-
-            return imageWatermarked;
-        }
-
-        public string CreateImageWatermark(string inputFile, string imageWatermark, ImageMarkOptions imageMarkOptions)
-        {
-            var folderName = Path.Combine("Resources", "Images\\Watermarks");
-            string outputFileName = @$"{folderName}\\{Path.GetFileName(inputFile).Split('.')[0]}-imageMarked.jpg";
-            string scaleWatermarkFileName = @$"{Path.GetFileName(imageWatermark)}-scaled.png";
-
-            // resize watermark image
-            using (var img = Image.FromFile(imageWatermark))
-            {
-                img.ScaleByWidth(imageMarkOptions.WatermarkScaleByWith == 0 ? 100 : imageMarkOptions.WatermarkScaleByWith)
-                    .SaveAs(scaleWatermarkFileName);
-            }
-
-            var iwmOps = new ImageWatermarkOptions
-            {
-                Location = (TargetSpot)imageMarkOptions.Location,
-
-                Opacity = imageMarkOptions.Opacity,
-            };
+            string outputFileName = GetOutputFileName(inputFile, "combineMarked");
+            string scaleWatermarkFileName = ScaleImageWaterMark(imageWatermark, imageMarkOptions);
+            var twmOps = SetTextWaterMarkOption(textMarkOptions);
+            var iwmOps = SetImageWaterMarkOptions(imageMarkOptions);
 
             using (var img = Image.FromFile(inputFile))
             {
                 var iwm = Image.FromFile(scaleWatermarkFileName);
 
-                img.AddImageWatermark(iwm, iwmOps)
+                img.ScaleByWidth(imageMarkOptions.ImageScaleByWith == 0 ? img.Width : imageMarkOptions.ImageScaleByWith)
+                    .AddImageWatermark(iwm, iwmOps)
+                    .AddTextWatermark(textWatermark, twmOps)
+                    .SaveAs(outputFileName);
+
+                iwm.Dispose();
+            }
+
+            return outputFileName;
+        }
+
+        public string CreateImageWatermark(string inputFile, string imageWatermark, ImageMarkOptions imageMarkOptions)
+        {
+            string outputFileName = GetOutputFileName(inputFile, "imageMarked");
+            string scaleWatermarkFileName = ScaleImageWaterMark(imageWatermark, imageMarkOptions);
+            var iwmOps = SetImageWaterMarkOptions(imageMarkOptions);
+
+            using (var img = Image.FromFile(inputFile))
+            {
+                var iwm = Image.FromFile(scaleWatermarkFileName);
+
+                img.ScaleByWidth(imageMarkOptions.ImageScaleByWith == 0 ? img.Width : imageMarkOptions.ImageScaleByWith)
+                    .AddImageWatermark(iwm, iwmOps)
                     .SaveAs(outputFileName);
 
                 iwm.Dispose();
@@ -54,9 +57,21 @@ namespace Infrastructure.Services
 
         public string CreateTextWatermark(string inputFile, string textWatermark, TextMarkOptions textMarkOptions)
         {
-            var folderName = Path.Combine("Resources", "Images\\Watermarks");
-            string outputFileName = @$"{folderName}\\{Path.GetFileName(inputFile).Split('.')[0]}-textMarked.jpg";
+            string outputFileName = GetOutputFileName(inputFile, "textMarked");
+            var twmOps = SetTextWaterMarkOption(textMarkOptions);
 
+            using (var img = Image.FromFile(inputFile))
+            {
+                img.ScaleByWidth(textMarkOptions.ImageScaleByWith == 0 ? img.Width : textMarkOptions.ImageScaleByWith)
+                    .AddTextWatermark(textWatermark, twmOps)
+                    .SaveAs(outputFileName);
+            }
+
+            return outputFileName;
+        }
+
+        private TextWatermarkOptions SetTextWaterMarkOption(TextMarkOptions textMarkOptions)
+        {
             var twmOps = new TextWatermarkOptions
             {
                 Location = (TargetSpot)textMarkOptions.Location,
@@ -65,22 +80,105 @@ namespace Infrastructure.Services
 
                 FontName = textMarkOptions.FontName == "" ? "Arial" : textMarkOptions.FontName,
 
-                // Text with red color and half opacity
-                TextColor = Color.FromArgb(200, Color.Red),
+                FontStyle = (FontStyle)textMarkOptions.FontStyle,
+
+                TextColor = Color.FromArgb(textMarkOptions.Opacity, GetColor(string.IsNullOrEmpty(textMarkOptions.TextColor) ? "White" : textMarkOptions.TextColor)),
 
                 // Use alpha channel to specify color opacity
                 // e.g. use 0 opacity to disable drawing the outline
-                OutlineColor = Color.FromArgb(0, Color.White),
+                OutlineColor = Color.FromArgb(textMarkOptions.Opacity, GetColor(string.IsNullOrEmpty(textMarkOptions.OutlineColor) ? "White" : textMarkOptions.OutlineColor))
+
             };
 
-            using (var img = Image.FromFile(inputFile))
+            return twmOps;
+        }
+
+        private ImageWatermarkOptions SetImageWaterMarkOptions(ImageMarkOptions imageMarkOptions)
+        {
+            var iwmOps = new ImageWatermarkOptions
             {
-                img //.Crop(500, 500)
-                    .AddTextWatermark(textWatermark, twmOps)
-                    .SaveAs(outputFileName);
+                Location = (TargetSpot)imageMarkOptions.Location,
+
+                // 0 full transparent, 100 full color
+                Opacity = imageMarkOptions.Opacity,
+            };
+
+            return iwmOps;
+        }
+
+        private string ScaleImageWaterMark(string imageWatermark, ImageMarkOptions imageMarkOptions)
+        {
+            string scaleWatermarkFileName = @$"{Path.GetFileName(imageWatermark)}-scaled.png";
+
+            // resize watermark image
+            using (var img = Image.FromFile(imageWatermark))
+            {
+                img.ScaleByWidth(imageMarkOptions.WatermarkScaleByWith == 0 ? 100 : imageMarkOptions.WatermarkScaleByWith)
+                    .SaveAs(scaleWatermarkFileName);
             }
 
+            return scaleWatermarkFileName;
+        }
+
+        private string GetOutputFileName(string inputFile, string endFixName)
+        {
+            string watermarkFolder = Path.Combine("Resources", "Images\\Watermarks");
+            string outputFileName = @$"{watermarkFolder}\\{Path.GetFileName(inputFile).Split('.')[0]}-{endFixName}.jpg";
             return outputFileName;
+        }
+
+        private Color GetColor(string color)
+        {
+            switch (color)
+            {
+                case "Black":
+                    return Color.Black;
+
+                case "Blue":
+                    return Color.Blue;
+
+                case "Brown":
+                    return Color.Brown;
+
+                case "Cyan":
+                    return Color.Cyan;
+
+                case "Gray":
+                    return Color.Gray;
+
+                case "Green":
+                    return Color.Green;
+
+                case "Lime":
+                    return Color.Lime;
+
+                case "Magenta":
+                    return Color.Magenta;
+
+                case "Navy":
+                    return Color.Navy;
+
+                case "Orange":
+                    return Color.Orange;
+
+                case "Pink":
+                    return Color.Pink;
+
+                case "White":
+                    return Color.White;
+
+                case "Red":
+                    return Color.Red;
+
+                case "Silver":
+                    return Color.Silver;
+
+                case "Yellow":
+                    return Color.Yellow;
+
+                default:
+                    return Color.White;
+            }
         }
     }
 }
@@ -92,6 +190,7 @@ public class ImageMarkOptions
     /// 8: bottom
     /// </summary>
     public int Location { get; set; }
+    public int ImageScaleByWith { get; set; }
 
     /// <summary>
     /// 0 full transparent, 100 full color
@@ -104,6 +203,12 @@ public class ImageMarkOptions
 public class TextMarkOptions
 {
     public int Location { get; set; }
+    public int ImageScaleByWith { get; set; }
     public int FontSize { get; set; }
-    public string FontName { get; set; }
+    public int FontStyle { get; set; }
+    public string? FontName { get; set; } = "";
+    public string? TextColor { get; set; } = "";
+    public string? OutlineColor { get; set; } = "";
+    public int Opacity { get; set; } = 100;
+
 }
