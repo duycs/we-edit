@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using Infrastructure.Extensions;
 using LazZiya.ImageResize;
 using Microsoft.AspNetCore.Components.Forms;
 using Org.BouncyCastle.Utilities.Encoders;
@@ -122,7 +123,7 @@ namespace Infrastructure.Services
 
         private string GetOutputFileName(string inputFile, string endFixName)
         {
-            string watermarkFolder = Path.Combine("Resources", "Images\\Watermarks");
+            string watermarkFolder = FileExtension.GetImageWatermarkFolder();
             string outputFileName = @$"{watermarkFolder}\\{Path.GetFileName(inputFile).Split('.')[0]}-{endFixName}.jpg";
             return outputFileName;
         }

@@ -1,4 +1,5 @@
 ﻿using Application.Models;
+using Infrastructure.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Net.Http.Headers;
@@ -17,7 +18,7 @@ namespace Houzz.Api.Controllers.WebControllers
             {
                 var formCollection = await Request.ReadFormAsync();
                 var file = formCollection.Files.First();
-                var folderName = Path.Combine("Resources", "Images\\Watermarks\\Temp");
+                var folderName = FileExtension.GetImageWatermarkFolderTemp();
                 var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
                 if (file.Length > 0)
                 {
@@ -57,7 +58,7 @@ namespace Houzz.Api.Controllers.WebControllers
             }
             memory.Position = 0;
 
-            return File(memory, GetContentType(filePath), filePath);
+            return File(memory, FileExtension.GetContentType(filePath), filePath);
         }
 
         [HttpGet]
@@ -79,10 +80,10 @@ namespace Houzz.Api.Controllers.WebControllers
         {
             try
             {
-                var folderName = Path.Combine("Resources", "Images\\Watermarks");
+                var folderName = FileExtension.GetImageWatermarkFolder();
                 var pathToRead = Path.Combine(Directory.GetCurrentDirectory(), folderName);
                 var photos = Directory.EnumerateFiles(pathToRead)
-                    .Where(IsAPhotoFile)
+                    .Where(fullPath => fullPath.IsAPhotoFile())
                     .Select(fullPath => new PhotoDto(@$"{Path.Combine(folderName, Path.GetFileName(fullPath))}?{DateTime.UtcNow.Ticks}")).ToArray();
 
                 return Ok(photos);
@@ -91,26 +92,6 @@ namespace Houzz.Api.Controllers.WebControllers
             {
                 return StatusCode(500, $"Internal server error: {ex}");
             }
-        }
-
-        private bool IsAPhotoFile(string fileName)
-        {
-            return fileName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase)
-                   || fileName.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)
-                   || fileName.EndsWith(".png", StringComparison.OrdinalIgnoreCase);
-        }
-
-        private string GetContentType(string path)
-        {
-            var provider = new FileExtensionContentTypeProvider();
-            string contentType;
-
-            if (!provider.TryGetContentType(path, out contentType))
-            {
-                contentType = "application/octet-stream";
-            }
-
-            return contentType;
         }
     }
 }
