@@ -3,24 +3,30 @@ using System.Drawing;
 using Infrastructure.Extensions;
 using LazZiya.ImageResize;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Hosting;
+using MySqlX.XDevAPI;
 using Org.BouncyCastle.Utilities.Encoders;
 
 namespace Infrastructure.Services
 {
 	public class Watermark : IWatermark
 	{
-		public Watermark()
+        private readonly IWebHostEnvironment _host;
+
+        public Watermark(IWebHostEnvironment host)
 		{
+            _host = host;
 		}
 
-        public string CreateCombineWatermark(string inputFile, string textWatermark, TextMarkOptions textMarkOptions, string imageWatermark, ImageMarkOptions imageMarkOptions)
+        public string CreateCombineWatermark(string session, string inputFile, string textWatermark, TextMarkOptions textMarkOptions, string imageWatermark, ImageMarkOptions imageMarkOptions)
         {
-            string outputFileName = GetOutputFileName(inputFile, "combineMarked");
-            string scaleWatermarkFileName = ScaleImageWaterMark(imageWatermark, imageMarkOptions);
+            string pathToInputFile = Path.Combine(_host.WebRootPath, inputFile);
+            string outputFileName = GetOutputFileName(session, inputFile, "combineMarked");
+            string scaleWatermarkFileName = ScaleImageWaterMark( imageWatermark, imageMarkOptions);
             var twmOps = SetTextWaterMarkOption(textMarkOptions);
             var iwmOps = SetImageWaterMarkOptions(imageMarkOptions);
 
-            using (var img = Image.FromFile(inputFile))
+            using (var img = Image.FromFile(pathToInputFile))
             {
                 var iwm = Image.FromFile(scaleWatermarkFileName);
 
@@ -35,13 +41,14 @@ namespace Infrastructure.Services
             return outputFileName;
         }
 
-        public string CreateImageWatermark(string inputFile, string imageWatermark, ImageMarkOptions imageMarkOptions)
+        public string CreateImageWatermark(string session, string inputFile, string imageWatermark, ImageMarkOptions imageMarkOptions)
         {
-            string outputFileName = GetOutputFileName(inputFile, "imageMarked");
+            string pathToInputFile = Path.Combine(_host.WebRootPath, inputFile);
+            string outputFileName = GetOutputFileName(session, inputFile, "imageMarked");
             string scaleWatermarkFileName = ScaleImageWaterMark(imageWatermark, imageMarkOptions);
             var iwmOps = SetImageWaterMarkOptions(imageMarkOptions);
 
-            using (var img = Image.FromFile(inputFile))
+            using (var img = Image.FromFile(pathToInputFile))
             {
                 var iwm = Image.FromFile(scaleWatermarkFileName);
 
@@ -56,12 +63,13 @@ namespace Infrastructure.Services
         }
 
 
-        public string CreateTextWatermark(string inputFile, string textWatermark, TextMarkOptions textMarkOptions)
+        public string CreateTextWatermark(string session, string inputFile, string textWatermark, TextMarkOptions textMarkOptions)
         {
-            string outputFileName = GetOutputFileName(inputFile, "textMarked");
+            string pathToInputFile = Path.Combine(_host.WebRootPath, inputFile);
+            string outputFileName = GetOutputFileName(session, inputFile, "textMarked");
             var twmOps = SetTextWaterMarkOption(textMarkOptions);
 
-            using (var img = Image.FromFile(inputFile))
+            using (var img = Image.FromFile(pathToInputFile))
             {
                 img.ScaleByWidth(textMarkOptions.ImageScaleByWith == 0 ? img.Width : textMarkOptions.ImageScaleByWith)
                     .AddTextWatermark(textWatermark, twmOps)
@@ -109,10 +117,11 @@ namespace Infrastructure.Services
 
         private string ScaleImageWaterMark(string imageWatermark, ImageMarkOptions imageMarkOptions)
         {
-            string scaleWatermarkFileName = @$"{Path.GetFileName(imageWatermark)}-scaled.png";
+            var pathToReadImageWatermark = Path.Combine(_host.WebRootPath, imageWatermark);
+            string scaleWatermarkFileName = @$"{Path.GetFileName(pathToReadImageWatermark)}-scaled.png";
 
             // resize watermark image
-            using (var img = Image.FromFile(imageWatermark))
+            using (var img = Image.FromFile(pathToReadImageWatermark))
             {
                 img.ScaleByWidth(imageMarkOptions.WatermarkScaleByWith == 0 ? 100 : imageMarkOptions.WatermarkScaleByWith)
                     .SaveAs(scaleWatermarkFileName);
@@ -121,10 +130,11 @@ namespace Infrastructure.Services
             return scaleWatermarkFileName;
         }
 
-        private string GetOutputFileName(string inputFile, string endFixName)
+        private string GetOutputFileName(string session, string inputFile, string endFixName)
         {
-            string watermarkFolder = FileExtension.GetImageWatermarkFolder();
-            string outputFileName = @$"{watermarkFolder}\\{Path.GetFileName(inputFile).Split('.')[0]}-{endFixName}.jpg";
+            var folderName = FileExtension.GetImageWatermarkFolder(session);
+            var pathToRead = Path.Combine(_host.WebRootPath, folderName);
+            string outputFileName = Path.Combine(pathToRead, $@"{Path.GetFileName(inputFile).Split('.')[0]}-{endFixName}.jpg");
             return outputFileName;
         }
 

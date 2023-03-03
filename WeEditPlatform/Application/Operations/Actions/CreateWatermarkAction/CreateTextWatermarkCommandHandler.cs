@@ -19,7 +19,7 @@ namespace Application.Operations.Actions.CreateWatermarkAction
 
         public async Task<Unit> Handle(CreateTextWatermarkCommand request, CancellationToken cancellationToken)
         {
-            _watermark.CreateTextWatermark(request.InputFile, request.TextWatermark, request.TextMarkOptions);
+            _watermark.CreateTextWatermark(request.Session, request.InputFile, request.TextWatermark, request.TextMarkOptions);
             return Unit.Value;
         }
     }

@@ -14,7 +14,7 @@ namespace Application.Operations.Actions.CreateWatermarkAction
 
         public async Task<Unit> Handle(CreateImageWatermarkCommand request, CancellationToken cancellationToken)
         {
-            _watermark.CreateImageWatermark(request.InputFile, request.ImageWatermark, request.ImageMarkOptions);
+            _watermark.CreateImageWatermark(request.Session, request.InputFile, request.ImageWatermark, request.ImageMarkOptions);
             return Unit.Value;
         }
 

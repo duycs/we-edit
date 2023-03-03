@@ -45,6 +45,7 @@
 
 	<ItemGroup>
 	  <Folder Include="Resources\Images\Watermarks\Temp\" />
+	  <Folder Include="wwwroot\Resources\Images\Watermarks\" />
 	</ItemGroup>
 
 </Project>

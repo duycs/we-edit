@@ -9,14 +9,14 @@ namespace Infrastructure.Extensions
 {
     public static class FileExtension
     {
-        public static string GetImageWatermarkFolder()
+        public static string GetImageWatermarkFolder(string session)
         {
-            return Path.Combine("Resources", "Images\\Watermarks");
+            return Path.Combine("Resources", "Images", "Watermarks", session);
         }
 
-        public static string GetImageWatermarkFolderTemp()
+        public static string GetImageWatermarkFolderTemp(string session)
         {
-            return $@"{GetImageWatermarkFolder()}\\Temp";
+            return Path.Combine(GetImageWatermarkFolder(session), "Temp");
         }
 
         public static bool IsAPhotoFile(this string fileName)

@@ -2,6 +2,7 @@
 using Infrastructure.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 
 namespace Houzz.Api.Controllers.WebControllers
@@ -10,6 +11,13 @@ namespace Houzz.Api.Controllers.WebControllers
     [Route("[controller]")]
     public class FilesController : ControllerBase
     {
+        private readonly IWebHostEnvironment _host;
+
+        public FilesController(IWebHostEnvironment host)
+        {
+            _host = host;
+        }
+
         [HttpPost, DisableRequestSizeLimit]
         [Route("upload")]
         public async Task<IActionResult> Upload()
@@ -17,9 +25,17 @@ namespace Houzz.Api.Controllers.WebControllers
             try
             {
                 var formCollection = await Request.ReadFormAsync();
+                StringValues session = "";
+                formCollection.TryGetValue("Session", out session);
                 var file = formCollection.Files.First();
-                var folderName = FileExtension.GetImageWatermarkFolderTemp();
-                var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
+                var folderName = FileExtension.GetImageWatermarkFolderTemp(session.ToString());
+                var pathToSave = Path.Combine(_host.WebRootPath, folderName);
+
+                if (!Directory.Exists(pathToSave))
+                {
+                    Directory.CreateDirectory(pathToSave);
+                }
+
                 if (file.Length > 0)
                 {
                     var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim();
@@ -46,7 +62,7 @@ namespace Houzz.Api.Controllers.WebControllers
         [Route("download")]
         public async Task<IActionResult> Download([FromQuery] string fileUrl)
         {
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), fileUrl);
+            var filePath = Path.Combine(_host.WebRootPath, fileUrl);
 
             if (!System.IO.File.Exists(filePath))
                 return NotFound();
@@ -65,7 +81,7 @@ namespace Houzz.Api.Controllers.WebControllers
         [Route("remove")]
         public async Task<IActionResult> Remove([FromQuery] string fileUrl)
         {
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), fileUrl);
+            var filePath = Path.Combine(_host.WebRootPath, fileUrl);
 
             if (!System.IO.File.Exists(filePath))
                 return NotFound();
@@ -76,12 +92,23 @@ namespace Houzz.Api.Controllers.WebControllers
 
         [HttpGet, DisableRequestSizeLimit]
         [Route("photos")]
-        public IActionResult GetPhotos()
+        public IActionResult GetPhotos([FromQuery]string Session)
         {
             try
             {
-                var folderName = FileExtension.GetImageWatermarkFolder();
-                var pathToRead = Path.Combine(Directory.GetCurrentDirectory(), folderName);
+                if (string.IsNullOrEmpty(Session))
+                {
+                    return NotFound();
+                }
+
+                var folderName = FileExtension.GetImageWatermarkFolder(Session);
+                var pathToRead = Path.Combine(_host.WebRootPath, folderName);
+
+                if (!Directory.Exists(pathToRead))
+                {
+                    return NotFound();
+                }
+
                 var photos = Directory.EnumerateFiles(pathToRead)
                     .Where(fullPath => fullPath.IsAPhotoFile())
                     .Select(fullPath => new PhotoDto(@$"{Path.Combine(folderName, Path.GetFileName(fullPath))}?{DateTime.UtcNow.Ticks}")).ToArray();
@@ -93,5 +120,11 @@ namespace Houzz.Api.Controllers.WebControllers
                 return StatusCode(500, $"Internal server error: {ex}");
             }
         }
+
+    }
+
+    public class UploadSetting
+    {
+        public string Session { get; set; }
     }
 }
