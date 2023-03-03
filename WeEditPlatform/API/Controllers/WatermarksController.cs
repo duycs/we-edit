@@ -12,19 +12,16 @@ namespace Houzz.Api.Controllers.WebControllers
     public class WatermarksController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly IWatermark _watermark;
 
-        public WatermarksController(IMediator mediator, IWatermark watermark)
+        public WatermarksController(IMediator mediator)
 		{
             _mediator = mediator;
-            _watermark = watermark;
 		}
 
         [HttpPost("image")]
         public async Task<IActionResult> CreateImageWatermark([FromBody] CreateImageWatermarkCommand command)
         {
             var result = await _mediator.Send(command);
-            //var result = _watermark.CreateImageWatermark(command.InputFile, command.ImageWatermark, command.ImageMarkOptions);
             return Ok(result);
         }
 
@@ -32,7 +29,6 @@ namespace Houzz.Api.Controllers.WebControllers
         public async Task<IActionResult> CreateTextWatermark([FromBody] CreateTextWatermarkCommand command)
         {
             var result = await _mediator.Send(command);
-            //var result = _watermark.CreateTextWatermark(command.InputFile, command.TextWatermark, command.TextMarkOptions);
             return Ok(result);
         }
 
@@ -40,8 +36,6 @@ namespace Houzz.Api.Controllers.WebControllers
         public async Task<IActionResult> CreateCombineWatermark([FromBody] CreateCombineWatermarkCommand command)
         {
             var result = await _mediator.Send(command);
-            //var result = _watermark.CreateCombineWatermark(command.InputFile, command.TextWatermark, command.TextMarkOptions,
-                //command.ImageWatermark, command.ImageMarkOptions);
             return Ok(result);
         }
 
