@@ -39,5 +39,15 @@ namespace Infrastructure.Extensions
 
             return contentType;
         }
+
+        public static string RemoveSuffix(this string filePath)
+        {
+            return filePath.Split("?")[0];
+        }
+
+        public static List<string> RemoveSuffix(this List<string> filePaths)
+        {
+            return filePaths.Select(f => f.RemoveSuffix()).ToList();
+        }
     }
 }

@@ -1,9 +1,12 @@
 ﻿using Application.Models;
 using Infrastructure.Extensions;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
+using System.IO;
+using System.IO.Compression;
 
 namespace Houzz.Api.Controllers.WebControllers
 {
@@ -60,9 +63,24 @@ namespace Houzz.Api.Controllers.WebControllers
 
         [HttpGet, DisableRequestSizeLimit]
         [Route("download")]
-        public async Task<IActionResult> Download([FromQuery] string fileUrl)
+        public async Task<IActionResult> Download([FromQuery] string fileUrls, [FromQuery] bool isZip = false)
         {
-            var filePath = Path.Combine(_host.WebRootPath, fileUrl);
+            if (string.IsNullOrEmpty(fileUrls))
+            {
+                return NotFound();
+            }
+
+            var fileUrlArr = fileUrls.Split(",").ToList();
+
+            // download zip images
+            if (isZip || fileUrlArr.Count > 1)
+            {
+                return ZipFiles(fileUrlArr);
+            }
+
+
+            // download single image
+            var filePath = Path.Combine(_host.WebRootPath, fileUrlArr[0]).RemoveSuffix();
 
             if (!System.IO.File.Exists(filePath))
                 return NotFound();
@@ -75,24 +93,36 @@ namespace Houzz.Api.Controllers.WebControllers
             memory.Position = 0;
 
             return File(memory, FileExtension.GetContentType(filePath), filePath);
+
         }
 
         [HttpGet]
         [Route("remove")]
-        public async Task<IActionResult> Remove([FromQuery] string fileUrl)
+        public async Task<IActionResult> Remove([FromQuery] string fileUrls)
         {
-            var filePath = Path.Combine(_host.WebRootPath, fileUrl);
-
-            if (!System.IO.File.Exists(filePath))
+            if (string.IsNullOrEmpty(fileUrls))
+            {
                 return NotFound();
+            }
 
-            System.IO.File.Delete(fileUrl);
+            var fileUrlArr = fileUrls.Split(",").ToList();
+
+            foreach (var fileUrl in fileUrlArr)
+            {
+                var filePath = Path.Combine(_host.WebRootPath, fileUrl).RemoveSuffix();
+
+                if (!System.IO.File.Exists(filePath))
+                    continue;
+
+                System.IO.File.Delete(filePath);
+            }
+
             return NoContent();
         }
 
         [HttpGet, DisableRequestSizeLimit]
         [Route("photos")]
-        public IActionResult GetPhotos([FromQuery]string Session)
+        public IActionResult GetPhotos([FromQuery] string Session)
         {
             try
             {
@@ -119,6 +149,41 @@ namespace Houzz.Api.Controllers.WebControllers
             {
                 return StatusCode(500, $"Internal server error: {ex}");
             }
+        }
+
+
+        private FileStreamResult ZipFiles(List<string> fileUrls)
+        {
+            var filePaths = new List<string>();
+
+            foreach (var fileUrl in fileUrls)
+            {
+                var filePath = Path.Combine(_host.WebRootPath, fileUrl).RemoveSuffix();
+                if (System.IO.File.Exists(filePath))
+                {
+                    filePaths.Add(filePath);
+                }
+            }
+
+            if (filePaths.Count == 0)
+            {
+                throw new FileNotFoundException();
+            }
+
+            var tempFile = Path.GetTempFileName();
+
+            using (var zipFile = System.IO.File.Create(tempFile))
+            using (var zipArchive = new ZipArchive(zipFile, ZipArchiveMode.Create))
+            {
+                foreach (var file in filePaths)
+                {
+                    zipArchive.CreateEntryFromFile(file, Path.GetFileName(file));
+                }
+            }
+
+            var stream = new FileStream(tempFile, FileMode.Open);
+
+            return File(stream, "application/zip", "images.zip");
         }
 
     }
