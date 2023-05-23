@@ -61,10 +61,18 @@ builder.Services.AddAuthentication(options =>
     o.RequireHttpsMetadata = false;
 });
 
+//builder.Services.AddAuthorization(options =>
+//{
+//    options.AddPolicy("apiPolicy", policy => policy.RequireClaim("api.read"));
+//    //options.AddPolicy("staffPolicy", policy => policy.RequireRole("staff", "admin", "cso", "editor", "qc"));
+//});
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("apiPolicy", policy => policy.RequireClaim("scope", "api.read"));
-    options.AddPolicy("staffPolicy", policy => policy.RequireRole("staff", "admin", "cso", "editor", "qc"));
+    options.AddPolicy("apiPolicy", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.RequireClaim("api.read");
+    });
 });
 
 // Cors
@@ -104,20 +112,17 @@ if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 }
 
 app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
-
+app.UseRouting();
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 app.UseStaticFiles();
-
-//app.UseStaticFiles(new StaticFileOptions()
-//{
-//    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"Resources")),
-//    RequestPath = new PathString("/Resources")
-//});
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers()
+        .RequireAuthorization();
+});
 
 app.MapHub<APIHub>("/apishub");
 

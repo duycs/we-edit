@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    [Authorize(Policy = "apiPolicy")]
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class ProductLevelsController : ControllerBase
@@ -26,7 +26,6 @@ namespace API.Controllers
             _repositoryService = repositoryService;
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpGet("{id}")]
         public IActionResult GetProductLevel(int id)
         {
@@ -34,7 +33,6 @@ namespace API.Controllers
             return Ok(productLevel);
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpGet]
         public IActionResult GetProductLevels([FromQuery] int pageNumber = 0, [FromQuery] int pageSize = 0, [FromQuery] string? columnOrders = "",
             [FromQuery] int[]? ids = null, [FromQuery] string? searchValue = "", [FromQuery] bool isInclude = true)
@@ -60,7 +58,7 @@ namespace API.Controllers
             }
         }
 
-        [Authorize(Policy = "staffPolicy")]
+       
         [HttpPost]
         public IActionResult AddProductLevel([FromBody] CreateProductLevelVM request)
         {
@@ -70,7 +68,7 @@ namespace API.Controllers
             return Ok(productLevel);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+       
         [HttpPut]
         public IActionResult UpdateProductLevel([FromBody] UpdateProductLevelVM request)
         {
@@ -88,7 +86,7 @@ namespace API.Controllers
             return Ok(productLevel);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+       
         [HttpDelete("{id}")]
         public IActionResult DeleteProductLevel(int id)
         {

@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace API.Controllers
 {
-    [Authorize(Policy = "apiPolicy")]
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class JobsController : ControllerBase
@@ -32,7 +32,6 @@ namespace API.Controllers
             _uriService = uriService;
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpGet("{id}")]
         public IActionResult GetJob(int id, [FromQuery] bool isInclude = true)
         {
@@ -40,7 +39,6 @@ namespace API.Controllers
             return Ok(job);
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpGet]
         public async Task<IActionResult> GetJobs([FromQuery] int pageNumber = 0, [FromQuery] int pageSize = 0, [FromQuery] string? columnOrders = "",
             [FromQuery] int[]? ids = null, [FromQuery] string? searchValue = "", [FromQuery] bool isInclude = true)
@@ -63,7 +61,6 @@ namespace API.Controllers
             }
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpGet("{id}/jobsteps")]
         public async Task<IActionResult> GetJobStepsOfJob(int id)
         {
@@ -71,7 +68,6 @@ namespace API.Controllers
             return Ok(jobSteps);
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpPost]
         public async Task<IActionResult> AddJob([FromBody] CreateJobVM request)
         {
@@ -79,7 +75,6 @@ namespace API.Controllers
             return Ok(job);
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpPost("steps")]
         public async Task<IActionResult> AddStepsToJob([FromBody] AddStepsToJobVM request)
         {
@@ -91,7 +86,6 @@ namespace API.Controllers
             return Ok(jobSteps);
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpPost("auto-assign")]
         public async Task<IActionResult> AutoAssignStaffToStep()
         {
@@ -99,7 +93,6 @@ namespace API.Controllers
             return Ok(jobSteps);
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpPut("assign")]
         public async Task<IActionResult> AssignStaffToStep([FromBody] AssignStaffToStepVM request)
         {
@@ -107,7 +100,6 @@ namespace API.Controllers
             return Ok(jobSteps);
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpPut("status")]
         public async Task<IActionResult> UpdateJobStatus([FromBody] UpdateJobStatusVM request)
         {
@@ -115,7 +107,6 @@ namespace API.Controllers
             return Ok(job);
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpPut("steps")]
         public async Task<IActionResult> RemoveStepsFromJob([FromBody] RemoveStepsFromJobVM request)
         {
@@ -123,7 +114,6 @@ namespace API.Controllers
             return Ok(jobSteps);
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpDelete("{id}")]
         public IActionResult RemoveJob(int id)
         {

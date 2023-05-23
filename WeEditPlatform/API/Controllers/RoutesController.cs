@@ -24,7 +24,7 @@ namespace API.Controllers
             _routeService = routeService;
         }
 
-        [Authorize(Policy = "staffPolicy")]
+       
         [HttpGet]
         public IActionResult GetRoutes([FromQuery] int fromOperationId)
         {
@@ -32,7 +32,7 @@ namespace API.Controllers
             return Ok(routes);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+       
         [HttpGet("{id}")]
         public IActionResult GetRoute(int id)
         {
@@ -40,7 +40,7 @@ namespace API.Controllers
             return Ok(route);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+       
         [HttpPost]
         public IActionResult AddRoute(CreateRouteVM request)
         {
@@ -48,7 +48,7 @@ namespace API.Controllers
             return Ok(route);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+       
         [HttpPut]
         public IActionResult UpdateRoute(UpdateRouteVM request)
         {
@@ -56,7 +56,7 @@ namespace API.Controllers
             return Ok(route);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+       
         [HttpDelete("{id}")]
         public IActionResult RemoveRoute(int id)
         {

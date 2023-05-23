@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    [Authorize(Policy = "apiPolicy")]
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class StaffsController : ControllerBase
@@ -52,7 +52,7 @@ namespace API.Controllers
             return Ok(staff);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+
         [HttpPut]
         public async Task<IActionResult> UpdateStaff([FromBody] UpdateStaffVM request)
         {
@@ -69,7 +69,7 @@ namespace API.Controllers
             return Ok(staff);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+
         [HttpDelete("{id}")]
         public IActionResult RemoveStaff(int id)
         {
@@ -82,7 +82,7 @@ namespace API.Controllers
             return Ok(message);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+
         [HttpGet("{id}")]
         public IActionResult GetStaff(string id, [FromQuery] bool isInclude = true)
         {
@@ -96,7 +96,7 @@ namespace API.Controllers
             return Ok(staffById);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+
         [HttpGet]
         public async Task<IActionResult> GetStaffs([FromQuery] int pageNumber = 0, [FromQuery] int pageSize = 0, [FromQuery] string? columnOrders = "",
           [FromQuery] int[]? ids = null, [FromQuery] string? searchValue = "", [FromQuery] bool isInclude = true)
@@ -120,7 +120,7 @@ namespace API.Controllers
             }
         }
 
-        [Authorize(Policy = "staffPolicy")]
+
         [HttpGet("{id}/jobSteps")]
         public IActionResult GetJobStepsOfWorker(int id)
         {
@@ -142,7 +142,7 @@ namespace API.Controllers
             return Ok(jobStepDtos);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+
         [HttpPost("roles")]
         public IActionResult AddRolesForStaff([FromBody] AddRolesForStaffVM request)
         {
@@ -150,7 +150,7 @@ namespace API.Controllers
             return Ok();
         }
 
-        [Authorize(Policy = "staffPolicy")]
+
         [HttpDelete("roles")]
         public IActionResult RemoveRolesForStaff([FromBody] RemoveRolesForStaffVM request)
         {
@@ -159,7 +159,7 @@ namespace API.Controllers
             return Ok();
         }
 
-        [Authorize(Policy = "staffPolicy")]
+
         [HttpPost("productLevels")]
         public IActionResult AddProductLevelForStaff([FromBody] AddProductLevelsForStaffVM request)
         {
@@ -173,7 +173,7 @@ namespace API.Controllers
             return Ok(message);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+
         [HttpDelete("productLevels")]
         public IActionResult RemoveProductLevelForStaff([FromBody] RemoveProductLevelsForStaffVM request)
         {
@@ -184,7 +184,7 @@ namespace API.Controllers
             return Ok();
         }
 
-        [Authorize(Policy = "staffPolicy")]
+
         [HttpPost("shifts/out")]
         public IActionResult SetStaffOutShift([FromBody] StaffOutShiftVM request)
         {
@@ -199,7 +199,7 @@ namespace API.Controllers
             return Ok(message);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+
         [HttpPost("shifts/in")]
         public IActionResult SetStaffInShift([FromBody] StaffInShiftVM request)
         {
@@ -213,7 +213,7 @@ namespace API.Controllers
             return Ok(message);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+
         [HttpPost("stepStatus")]
         public IActionResult UpdateStepStatus([FromBody] UpdateStepStatusVM request)
         {

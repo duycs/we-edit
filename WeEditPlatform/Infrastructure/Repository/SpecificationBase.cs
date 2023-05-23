@@ -20,22 +20,16 @@ namespace Infrastructure.Repository
 
         protected SpecificationBase(Expression<Func<T, bool>> criteria)
         {
-            Criteria = c => true;
+            Criteria = criteria;
         }
 
         /// <summary>
         /// Default do not filter
         /// </summary>
-        protected SpecificationBase(bool isInclude)
+        protected SpecificationBase(bool isInclude = true)
         {
             Criteria = c => true;
             IsInclude = isInclude;
-        }
-
-        protected SpecificationBase()
-        {
-            Criteria = c => true;
-            IsInclude = true;
         }
 
         /// <summary>

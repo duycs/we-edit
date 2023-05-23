@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("[controller]")]
     public class FlowsController : ControllerBase
     {
@@ -24,7 +25,6 @@ namespace API.Controllers
             _flowService = flowService;
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpGet]
         public IActionResult GetFlows([FromQuery] int pageNumber = 0, [FromQuery] int pageSize = 0, [FromQuery] string? columnOrders = "",
          [FromQuery] string? searchValue = "", [FromQuery] int[]? ids = null, [FromQuery] bool isInclude = true)
@@ -45,7 +45,6 @@ namespace API.Controllers
             }
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpGet("{id}")]
         public IActionResult GetFlow(int id, [FromQuery] bool isInclude = true)
         {
@@ -53,7 +52,6 @@ namespace API.Controllers
             return Ok(flow);
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpPost]
         public IActionResult AddFlow(CreateFlowVM request)
         {
@@ -61,7 +59,6 @@ namespace API.Controllers
             return Ok(flow);
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpPut]
         public IActionResult UpdateFlow(UpdateFlowVM request)
         {
@@ -69,7 +66,6 @@ namespace API.Controllers
             return Ok(flow);
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpDelete("{id}")]
         public IActionResult RemoveFlow(int id)
         {
@@ -82,7 +78,6 @@ namespace API.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [Authorize(Policy = "staffPolicy")]
         [HttpPost("instant")]
         public async Task<IActionResult> RunFlow([FromBody] InstantFlowVM request)
         {

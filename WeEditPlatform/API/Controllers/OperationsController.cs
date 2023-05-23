@@ -20,7 +20,6 @@ namespace API.Controllers
             _operationService = operationService;
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpPost]
         public IActionResult AddOperation(CreateOperationVM request)
         {
@@ -28,7 +27,6 @@ namespace API.Controllers
             return Ok(operationCreated);
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpPut]
         public IActionResult UpdateOperation(UpdateOperationVM request)
         {
@@ -36,7 +34,6 @@ namespace API.Controllers
             return Ok(operationUpdated);
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpGet("{id}")]
         public IActionResult GetOperation(int id, bool isInclude)
         {
@@ -44,7 +41,6 @@ namespace API.Controllers
             return Ok(operationCreated);
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpDelete("{id}")]
         public IActionResult DeleteOperation(int id)
         {

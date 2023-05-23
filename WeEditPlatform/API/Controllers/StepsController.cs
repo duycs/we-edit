@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    [Authorize(Policy = "apiPolicy")]
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class StepsController : ControllerBase
@@ -27,7 +27,6 @@ namespace API.Controllers
             _repositoryService = repositoryService;
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpGet]
         public IActionResult GetSteps([FromQuery] int pageNumber = 0, [FromQuery] int pageSize = 0, [FromQuery] string? columnOrders = "",
           [FromQuery] int[]? ids = null, [FromQuery] string? searchValue = "", [FromQuery] bool isInclude = true)
@@ -52,7 +51,6 @@ namespace API.Controllers
             }
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpGet("{id}")]
         public IActionResult GetStep(int id)
         {
@@ -60,7 +58,6 @@ namespace API.Controllers
             return Ok(step);
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpPost]
         public IActionResult AddStep([FromBody] CreateStepVM request)
         {
@@ -84,7 +81,6 @@ namespace API.Controllers
             return Ok(stepCreated);
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpPut]
         public IActionResult UpdateStep([FromBody] UpdateStepVM request)
         {
@@ -114,7 +110,6 @@ namespace API.Controllers
             return Ok(stepUpdated);
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpDelete("{id}")]
         public IActionResult Remove(int id)
         {

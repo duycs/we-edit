@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    [Authorize(Policy = "apiPolicy")]
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class NotesController : ControllerBase
@@ -24,7 +24,6 @@ namespace API.Controllers
             _noteService = noteService;
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpGet]
         public IActionResult GetNotes([FromQuery] int pageNumber = 0, [FromQuery] int pageSize = 0,
            [FromQuery] string? objectName = "", [FromQuery] int[]? objectIds = null, [FromQuery] string? searchValue = "", [FromQuery] int[]? ids = null)
@@ -45,7 +44,6 @@ namespace API.Controllers
             }
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpGet("{id}")]
         public IActionResult GetNote(int id)
         {
@@ -53,7 +51,6 @@ namespace API.Controllers
             return Ok(note);
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpPost]
         public IActionResult AddNote([FromBody] CreateNoteVM request)
         {
@@ -61,7 +58,6 @@ namespace API.Controllers
             return Ok(noteCreated);
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpPut]
         public IActionResult UpdateNote([FromBody] UpdateNoteVM request)
         {
@@ -69,7 +65,6 @@ namespace API.Controllers
             return Ok(noteUpdated);
         }
 
-        [Authorize(Policy = "staffPolicy")]
         [HttpDelete("{id}")]
         public IActionResult RemoveNote(int id)
         {
