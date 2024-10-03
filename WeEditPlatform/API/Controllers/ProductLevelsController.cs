@@ -26,7 +26,7 @@ namespace API.Controllers
             _repositoryService = repositoryService;
         }
 
-        [Authorize(Policy = "staffPolicy")]
+        [Authorize]
         [HttpGet("{id}")]
         public IActionResult GetProductLevel(int id)
         {
@@ -34,7 +34,7 @@ namespace API.Controllers
             return Ok(productLevel);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+        [Authorize]
         [HttpGet]
         public IActionResult GetProductLevels([FromQuery] int pageNumber = 0, [FromQuery] int pageSize = 0, [FromQuery] string? columnOrders = "",
             [FromQuery] int[]? ids = null, [FromQuery] string? searchValue = "", [FromQuery] bool isInclude = true)
@@ -60,7 +60,7 @@ namespace API.Controllers
             }
         }
 
-        [Authorize(Policy = "staffPolicy")]
+        [Authorize]
         [HttpPost]
         public IActionResult AddProductLevel([FromBody] CreateProductLevelVM request)
         {
@@ -70,7 +70,7 @@ namespace API.Controllers
             return Ok(productLevel);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+        [Authorize]
         [HttpPut]
         public IActionResult UpdateProductLevel([FromBody] UpdateProductLevelVM request)
         {
@@ -88,7 +88,7 @@ namespace API.Controllers
             return Ok(productLevel);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+        [Authorize]
         [HttpDelete("{id}")]
         public IActionResult DeleteProductLevel(int id)
         {

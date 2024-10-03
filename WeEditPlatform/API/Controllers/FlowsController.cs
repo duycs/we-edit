@@ -24,7 +24,7 @@ namespace API.Controllers
             _flowService = flowService;
         }
 
-        [Authorize(Policy = "staffPolicy")]
+        [Authorize]
         [HttpGet]
         public IActionResult GetFlows([FromQuery] int pageNumber = 0, [FromQuery] int pageSize = 0, [FromQuery] string? columnOrders = "",
          [FromQuery] string? searchValue = "", [FromQuery] int[]? ids = null, [FromQuery] bool isInclude = true)
@@ -45,7 +45,7 @@ namespace API.Controllers
             }
         }
 
-        [Authorize(Policy = "staffPolicy")]
+        [Authorize]
         [HttpGet("{id}")]
         public IActionResult GetFlow(int id, [FromQuery] bool isInclude = true)
         {
@@ -53,7 +53,7 @@ namespace API.Controllers
             return Ok(flow);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+        [Authorize]
         [HttpPost]
         public IActionResult AddFlow(CreateFlowVM request)
         {
@@ -61,7 +61,7 @@ namespace API.Controllers
             return Ok(flow);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+        [Authorize]
         [HttpPut]
         public IActionResult UpdateFlow(UpdateFlowVM request)
         {
@@ -69,7 +69,7 @@ namespace API.Controllers
             return Ok(flow);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+        [Authorize]
         [HttpDelete("{id}")]
         public IActionResult RemoveFlow(int id)
         {
@@ -82,7 +82,7 @@ namespace API.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [Authorize(Policy = "staffPolicy")]
+        [Authorize]
         [HttpPost("instant")]
         public async Task<IActionResult> RunFlow([FromBody] InstantFlowVM request)
         {

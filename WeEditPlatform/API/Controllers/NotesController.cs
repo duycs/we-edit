@@ -24,7 +24,7 @@ namespace API.Controllers
             _noteService = noteService;
         }
 
-        [Authorize(Policy = "staffPolicy")]
+        [Authorize]
         [HttpGet]
         public IActionResult GetNotes([FromQuery] int pageNumber = 0, [FromQuery] int pageSize = 0,
            [FromQuery] string? objectName = "", [FromQuery] int[]? objectIds = null, [FromQuery] string? searchValue = "", [FromQuery] int[]? ids = null)
@@ -45,7 +45,7 @@ namespace API.Controllers
             }
         }
 
-        [Authorize(Policy = "staffPolicy")]
+        [Authorize]
         [HttpGet("{id}")]
         public IActionResult GetNote(int id)
         {
@@ -53,7 +53,7 @@ namespace API.Controllers
             return Ok(note);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+        [Authorize]
         [HttpPost]
         public IActionResult AddNote([FromBody] CreateNoteVM request)
         {
@@ -61,7 +61,7 @@ namespace API.Controllers
             return Ok(noteCreated);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+        [Authorize]
         [HttpPut]
         public IActionResult UpdateNote([FromBody] UpdateNoteVM request)
         {
@@ -69,7 +69,7 @@ namespace API.Controllers
             return Ok(noteUpdated);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+        [Authorize]
         [HttpDelete("{id}")]
         public IActionResult RemoveNote(int id)
         {

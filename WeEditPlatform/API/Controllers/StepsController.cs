@@ -27,7 +27,7 @@ namespace API.Controllers
             _repositoryService = repositoryService;
         }
 
-        [Authorize(Policy = "staffPolicy")]
+        [Authorize]
         [HttpGet]
         public IActionResult GetSteps([FromQuery] int pageNumber = 0, [FromQuery] int pageSize = 0, [FromQuery] string? columnOrders = "",
           [FromQuery] int[]? ids = null, [FromQuery] string? searchValue = "", [FromQuery] bool isInclude = true)
@@ -52,7 +52,7 @@ namespace API.Controllers
             }
         }
 
-        [Authorize(Policy = "staffPolicy")]
+        [Authorize]
         [HttpGet("{id}")]
         public IActionResult GetStep(int id)
         {
@@ -60,7 +60,7 @@ namespace API.Controllers
             return Ok(step);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+        [Authorize]
         [HttpPost]
         public IActionResult AddStep([FromBody] CreateStepVM request)
         {
@@ -84,7 +84,7 @@ namespace API.Controllers
             return Ok(stepCreated);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+        [Authorize]
         [HttpPut]
         public IActionResult UpdateStep([FromBody] UpdateStepVM request)
         {
@@ -114,7 +114,7 @@ namespace API.Controllers
             return Ok(stepUpdated);
         }
 
-        [Authorize(Policy = "staffPolicy")]
+        [Authorize]
         [HttpDelete("{id}")]
         public IActionResult Remove(int id)
         {
