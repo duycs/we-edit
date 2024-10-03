@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Domain
 {
@@ -14,21 +15,25 @@ namespace Domain
         public string Email { get; set; }
 
         [JsonIgnore]
+        [IgnoreDataMember]
         public ICollection<StaffRole>? StaffRoles { get; set; }
         public ICollection<Role>? Roles { get; set; }
 
 
         [JsonIgnore]
+        [IgnoreDataMember]
         public ICollection<StaffGroup>? StaffGroup { get; set; }
         public ICollection<Group>? Groups { get; set; }
 
 
         [JsonIgnore]
+        [IgnoreDataMember]
         public ICollection<StaffProductLevel>? StaffProductLevels { get; set; }
         public ICollection<ProductLevel>? ProductLevels { get; set; }
 
 
         [JsonIgnore]
+        [IgnoreDataMember]
         public ICollection<StaffShift>? StaffShifts { get; set; }
         public ICollection<Shift>? Shifts { get; set; }
 

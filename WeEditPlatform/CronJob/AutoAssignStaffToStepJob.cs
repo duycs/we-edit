@@ -39,7 +39,7 @@ namespace CronJob
 
                 var jobSteps = _jobService.AutoAssignStaffToStep().Select(w => new { w.JobId, w.StepId, w.WorkerId, w.Status });
 
-                _logger.LogInformation("Auto Assign JobSteps: ", JsonConvert.SerializeObject(jobSteps));
+                _logger.LogInformation("Auto Assign JobSteps: " + JsonConvert.SerializeObject(jobSteps));
 
 
                 watch.Stop();

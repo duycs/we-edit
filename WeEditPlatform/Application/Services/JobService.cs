@@ -4,6 +4,7 @@ using Application.Queries;
 using Domain;
 using Infrastructure.Pagging;
 using Infrastructure.Repository;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace Application.Services
@@ -11,10 +12,12 @@ namespace Application.Services
     public class JobService : IJobService
     {
         private readonly IRepositoryService _repositoryService;
+        private readonly ILogger<JobService> _logger;
 
-        public JobService(IRepositoryService repositoryService)
+        public JobService(IRepositoryService repositoryService, ILogger<JobService> logger)
         {
             _repositoryService = repositoryService;
+            _logger = logger;
         }
 
         public Job CreateJob(CreateJobVM request)
@@ -261,28 +264,44 @@ namespace Application.Services
                 // Scan Jobs have Todo Steps
                 var todoJobSteps = _repositoryService.List<JobStep>(w => w.Status == null || w.Status == StepStatus.Todo).ToList();
 
+                _logger.LogInformation("todoJobSteps: " + todoJobSteps.Count());
+
                 // And Not Expired time
                 if (!string.IsNullOrEmpty(validJobStepIsExpriedMethod))
                 {
-                    todoJobSteps = todoJobSteps.Where(s => !s.IsExpried()).ToList();
+                    //todoJobSteps = todoJobSteps.Where(s => !s.IsExpried()).ToList();
+
+                    _logger.LogInformation("todoJobSteps is valid: " + todoJobSteps.Count());
                 }
 
                 // Matching Staff and Step by ProductLevel
                 if (!todoJobSteps.Any())
                 {
+                    _logger.LogInformation("no todoJobSteps");
+                    
                     return new List<JobStep>();
                 }
 
                 // Scan free Staffs and active
                 var freeStaffs = _repositoryService.Find<Staff>(new StaffFreeSpecification()).ToList();
-                if (freeStaffs == null && !freeStaffs.Any())
+
+                _logger.LogInformation("freeStaffs: " + freeStaffs.Count());
+
+                if (!freeStaffs.Any())
                 {
+                    _logger.LogInformation("no freeStaffs");
+
                     return new List<JobStep>();
                 }
 
                 var freeActiveStaffs = freeStaffs.Where(s => s.IsActive()).ToList();
+
+                _logger.LogInformation("freeActiveStaffs: " + freeActiveStaffs.Count());
+
                 if (freeActiveStaffs == null || !freeActiveStaffs.Any())
                 {
+                    _logger.LogInformation("no freeActiveStaffs");
+
                     return new List<JobStep>();
                 }
 
@@ -306,10 +325,15 @@ namespace Application.Services
                 var matchedStaffs = new List<Staff>();
                 var step = steps.FirstOrDefault(s => s.Id == jobStep.StepId);
 
+                if(step != null) continue;
+
+                _logger.LogInformation("Step: " + JsonConvert.SerializeObject(step));
+
                 // And Group matching
                 if (matchingAssignSetting.IsGroupMatching)
                 {
                     matchedStaffs = freeActiveStaffs.Where(s => s.Groups != null && s.Groups.Select(g => g.Id).Contains(step.GroupId)).ToList();
+                    _logger.LogInformation("Group matchedStaffs: " + matchedStaffs.Count());
                 }
 
                 // And ProductLevel matching
@@ -317,11 +341,17 @@ namespace Application.Services
                 {
                     matchedStaffs = matchedStaffs.Where(s => s.ProductLevels != null &&
                         s.ProductLevels.Contains(step.ProductLevel)).ToList();
+
+                    _logger.LogInformation("ProductLevel matchedStaffs: " + matchedStaffs.Count());
                 }
+
+                _logger.LogInformation("MatchedStaffs: " + matchedStaffs.Count());
 
                 if (matchedStaffs != null && matchedStaffs.Any())
                 {
                     var matchedStaff = matchedStaffs.FirstOrDefault();
+
+                    _logger.LogInformation("MatchedStaff: " + JsonConvert.SerializeObject(matchedStaff));
 
                     // Assign staff to step, set status Assigned
                     jobStep.SetWorkerAtShift(matchedStaff.Id, matchedStaff.GetCurrentShift().Id);
@@ -337,6 +367,8 @@ namespace Application.Services
                     assignedJobSteps.Add(jobStep);
                 }
             }
+
+            _logger.LogInformation("assignedJobSteps: " + JsonConvert.SerializeObject(assignedJobSteps));
 
             return assignedJobSteps;
         }

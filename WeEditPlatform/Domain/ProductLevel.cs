@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Domain
 {
@@ -12,6 +13,7 @@ namespace Domain
         public string Description { get; set; }
 
         [JsonIgnore]
+        [IgnoreDataMember]
         public virtual ICollection<StaffProductLevel>? StaffProductLevels { get; set; }
         public virtual ICollection<Staff>? Staffs { get; set; }
 
